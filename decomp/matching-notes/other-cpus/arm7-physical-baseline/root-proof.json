@@ -1,5 +1,5 @@
 {
-  "status": "root_verified_pending_final_review",
+  "status": "root_verified_and_reviewed",
   "source_commit": "7b3513f05adc88a1cca8b0365d3a3607a50a1b25",
   "source_base_commit": "d38bad627b7074eb4b39a0901fe8e9a36a34756b",
   "source_tree": "42448bc68cd596f36c3c56147988d28b36802ba4",
@@ -65,5 +65,11 @@
     "logs/root-release-example.log": "0373bd5f9e0de8abbac6d315801d7592e7ab9c5e60d9b8767cb1af75e23a1d29",
     "logs/root-readelf.log": "5e239d6ac525d1e7a2f309399bba5e835f7e87657b5675a2835909e2d90cf993",
     "root-source-hash-comparison.json": "39d1d2bdcda44c859fb5ef2c5c510b76b7f0fa89d475ff35223f441a7df7f7a7"
+  },
+  "review": {
+    "reviewed_JUS_commit": "a3e3dd6",
+    "model": "gpt-6.1-sol",
+    "result": "No flags",
+    "scope": "native producer, proof bundle and decision trail; pending canonical integration excluded"
   }
 }

@@ -147,4 +147,6 @@ That compatibility pipeline preserves ARM7 from the original template.
 It does not consume these native ARM7 outputs. Canonical consumption is a
 separate, still-pending integration scope. Original ARM7 functions,
 executability and relocations remain unknown; source credit is zero.
-Final bundle review is pending.
+Independent gpt-6.1-sol review of `a3e3dd6` found no flags for the native
+producer, proof bundle and trail. See `accepted-review.json`. Canonical
+integration remains a separate pending scope.
