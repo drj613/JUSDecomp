@@ -1,0 +1,5 @@
+ts	phase	decision	why	evidence	result
+2026-10-05T02:15:04Z	T01	Created track-a/matching from upstream 6a061e3 and owned fork drj613/JUSDecomp	Plan requires a durable owned remote while preserving upstream	decomp/toolchain.lock.json	branch and fork created; parent verified
+2026-10-05T02:15:04Z	T01	Accepted AJUJ revision 0 ROM after upstream SHA1 comparison	Reject a different revision before extraction	decomp/rom-manifest.json; tools/scripts/baseline_intake.py	SHA1 matches; six public tests pass
+2026-10-05T02:15:05Z	T01	Recorded successful native dsd extraction, delink, LCF and objdiff generation; kept original baseline blocked	mwldarm is absent and all 17 module checks fail without linked outputs	decomp/matching-notes/baseline-t01/generation-results.json; decomp/matching-notes/baseline-t01/check-result.json	partial evidence retained; no baseline pass
+2026-10-05T02:15:05Z	T01-native	Started native LLVM linker experiment as jus-bjry.12 in an isolated worktree	Owner has no private linker and authorized a Unix or Mac approach	bead jus-bjry.12; /private/tmp/jus-track-a-native-link	lld 23.1.2 installed; implementation underway
