@@ -84,3 +84,17 @@ Startup reads from external RAM sources `0x023fe940` (352 bytes) and
 `0x023fe904` (32 bytes); their contents and executable status remain unresolved.
 An honest ARM7 baseline still requires original symbol/relocation analysis,
 configuration and delink integration, actual linking, and independent checks.
+
+## Independent integration verification
+
+The independent rebuild matches both recorded native tool hashes and the exact
+patched source tree. All 29 Rust tests and the documented clippy command pass.
+The preserved reviewer control exits 0; the reserved-overlay and decoded-name
+mutations each exit 1 with `Error: NitroFs`. Both actual program views match the
+worker result, with unchanged input hashes and zero source credit.
+
+[root-build](arm7-checked-view-root-build.json),
+[root-proof](arm7-checked-view-root-proof.json), and
+[root-tests](arm7-checked-view-root-tests.log) record the independent checks.
+The exact patch path has a Git whitespace attribute for literal blank context
+lines; applied Rust source still passes strict whitespace checking.
