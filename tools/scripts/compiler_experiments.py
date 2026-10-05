@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from source_build import compare_objects, _object, _relocations, _functions, _masked
+from source_build import compare_objects, _object, _relocations, _functions, _masked, require_header_free
 
 
 def digest(path):
@@ -43,13 +43,7 @@ def validate_unit(unit, root):
     for context in unit['contexts']:
         if context_hash(context) != context['sha256']:
             raise ValueError('context hash differs from saved experiment')
-        if (context['include_paths'] or context['headers'] or
-                re.search(r'^\s*#\s*include', source.read_text(), re.M) or
-                any(flag.startswith(('-I', '-ir', '-isystem', '-prefix', '-include', '-stdinc'))
-                    for flag in context['flags'])):
-            raise ValueError('header-free experiment required; dependency capture is not implemented')
-        if '-nostdinc' not in context['flags']:
-            raise ValueError('header-free context must disable ambient standard includes')
+        require_header_free(source, context['flags'], context['headers'], context['include_paths'])
 
 
 def validate_compiler(compiler, tool_root):

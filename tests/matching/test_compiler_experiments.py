@@ -55,6 +55,16 @@ class CompilerExperimentTests(unittest.TestCase):
             self.assertTrue(SCRIPT.exists(), 'compiler experiment runner missing')
             tool().validate_unit(unit, root)
 
+    def test_comment_and_spliced_includes_cannot_bypass_saved_context(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); unit = self.setup_case(root)
+            for text in ('#/**/include "untracked.h"\n', '%:include "untracked.h"\n',
+                         '#inc\\\nlude "untracked.h"\n'):
+                (root / 'case.c').write_text(text + 'int case_function(void) { return X; }\n')
+                unit['source_sha256'] = hashlib.sha256((root / 'case.c').read_bytes()).hexdigest()
+                with self.subTest(text=text), self.assertRaisesRegex(ValueError, 'header-free'):
+                    tool().validate_unit(unit, root)
+
     def test_prefix_header_flags_cannot_bypass_header_free_scope(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); unit = self.setup_case(root)
