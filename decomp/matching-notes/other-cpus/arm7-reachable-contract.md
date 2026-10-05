@@ -11,7 +11,15 @@ This is architect grounding only. Sketch, arena, implementation, and acceptance
 remain future work. The inspected DSD checkout is
 `7b3513f05adc88a1cca8b0365d3a3607a50a1b25`. Graph search in
 `ds-decomp-t10-pin` found two unrelated `arm7_bios` fields and no relevant ARM7
-implementation nodes, so this trace uses the actual source files.
+implementation nodes, so the initial trace used the actual source files.
+The graph was then refreshed. Future discovery uses project
+`ds-decomp-arm7-physical-7b3513f`, where `observe`, `decode_span`, and
+`Arm7View.checked_envelope` now resolve to the inspected source. The checked
+entry accessor also reads successfully through `get_code_snippet`.
+For the separate canonical Python verifier, project `JUSDecomp-verification`
+indexes the current `tools/scripts` tree, including `build_child`,
+`merge_snapshot`, and `recheck_child`. The broad `JUSDecomp` index filters that
+directory; its absence there is not evidence that those functions are missing.
 
 ## The checked input and observer boundary
 
