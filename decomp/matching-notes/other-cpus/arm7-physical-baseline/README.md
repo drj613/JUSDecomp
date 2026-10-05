@@ -120,3 +120,31 @@ physical integration review remain the integration owner's next checks.
 
 Startup dependencies on external RAM, original symbol boundaries, original
 relocations, ARM7 source, and full executable coverage remain unresolved.
+
+## Independent root checkpoint
+
+The root applied the durable patch to exact `d38bad6` with strict whitespace
+checks and reproduced tree `42448bc6`, then built at source `7b3513f`.
+All 80 Rust tests and strict clippy passed. Both release hashes match the
+worker. `root-proof.json` records the source, tools and evidence hashes.
+
+`root-actual-proof.json` comes from a fresh run on both real programs.
+`root-readback.json` independently binds their original headers and the exact
+child FAT entry. Reading only actual ELF load segments in stored LMA order
+reconstructs both complete 165,552-byte images exactly. The root's native LLVM
+readback is in `logs/root-readelf.log`; it reports ARMv4T attributes, six load
+segments and both separate BSS extents. BSS contributes no stored bytes.
+
+Fresh strict ARM9 init retains all 51 parent and nine child metadata files
+byte-for-byte. Experimental JUS producer `741b44d` passes every stage of the
+19-stage ARM9/source/whole-ROM compatibility pipeline. It checks all 17 ARM9
+modules and 87,493 original relocation slots, preserves 304 matching source
+bytes, and reproduces the exact 67,108,864-byte original ROM. Of 72 source
+hashes, 71 are unchanged; the sole intentional delta is that isolated
+producer's toolchain lock. Canonical production pins remain unchanged.
+
+That compatibility pipeline preserves ARM7 from the original template.
+It does not consume these native ARM7 outputs. Canonical consumption is a
+separate, still-pending integration scope. Original ARM7 functions,
+executability and relocations remain unknown; source credit is zero.
+Final bundle review is pending.
