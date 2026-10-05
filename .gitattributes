@@ -29,3 +29,4 @@
 
 # Preserve literal unified-diff context in this reviewed patch artifact.
 decomp/matching-notes/other-cpus/arm7-checked-view.patch whitespace=-blank-at-eol
+decomp/matching-notes/other-cpus/arm7-module-input.patch whitespace=-blank-at-eol

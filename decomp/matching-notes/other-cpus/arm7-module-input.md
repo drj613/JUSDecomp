@@ -97,3 +97,25 @@ ARM7-valid branch target policy, and program-scoped original symbols and
 relocations. Startup RAM sources `0x023fe940` and `0x023fe904`, original
 compiler/SDK/ABI, autoload-wide modes and linking remain unresolved. This
 candidate changes no production pins and earns zero ARM7 source bytes.
+
+## Independent integration verification
+
+The root source tree, probe and CLI hashes match the candidate. All 41 Rust
+tests and the documented clippy command pass. Both actual program views and
+four explicit spans match the worker result; both sidecar-pin mutations reject
+with zero output. Fresh strict initialization reproduces all 51 parent and
+nine child metadata files, with unchanged original inputs.
+
+The new CLI also passes all 19 stages of the existing 304-byte ARM9 source
+and exact whole-ROM pipeline using an isolated experimental pin at producer
+`b23ecb1`, preserved on branch `track-a/arm7-adapter-proof`. This proves ARM9
+compatibility; it establishes no ARM7 linked baseline. Canonical production
+pins remain unchanged.
+
+[Root build](arm7-module-input-root-build.json),
+[root observations](arm7-module-input-root-proof.json),
+[root tests](arm7-module-input-root-tests.log), and
+[ARM9 compatibility](arm7-module-input-root-arm9-compatibility.json) record
+the independent checks. The durable patch has an exact-path whitespace
+attribute for literal diff context; applied Rust source remains strictly
+checked. ARM7 source credit remains zero.
