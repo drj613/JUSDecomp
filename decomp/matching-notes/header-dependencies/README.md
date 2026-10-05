@@ -70,3 +70,7 @@ Header-free canonical TUs keep the existing single compilation and record explic
 header-free policy. Dependencies award zero source credit; raw object, link-input,
 ownership, relocation, module, symbol and whole-ROM gates remain necessary. A fresh
 real JUS run with this change passed all 19 stages and reproduced the original ROM.
+
+Reviewed producer `a2ffe1df8a3da44084978f6d481110bdb3049900` passed 159 tests without skips.
+`source-report.json` records the fresh 19-stage JUS source verification;
+`tests.log` and `review.json` retain the test and independent review results.

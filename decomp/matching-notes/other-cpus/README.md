@@ -33,3 +33,8 @@ python3 tools/scripts/other_executables.py --rom "$ROM" --inventory decomp/match
 The last command exits with status 1 at the unresolved child call. The standalone scope command does not run extraction or grant verification-pipeline credit. Its input inventory is trusted pinned metadata supplied by the caller. `verify_extracted_payload` compares actual fresh ARM7 bytes; `verify_extracted_arm9_modules` compares the child module files. `probe_cpu_compiler` checks actual compiler, runner and source hashes before and after compilation, requires explicit CPU and instruction mode, and inspects the resulting ELF functions.
 
 T10 still requires ARM7 analysis and relocation metadata, independent original compiler matching, linked baselines, source promotion of every residual interval, and recursive executable discovery in proprietary asset containers. Remaining function and symbol counts are unknown, not zero. Emulator smoke testing belongs to T07 and was not run here.
+
+The root repeated extraction and CPU probes at producer `a2ffe1df8a3da44084978f6d481110bdb3049900`.
+`fresh-scope.json`, `fresh-extraction-checks.json`, `fresh-cpu-probes.json`
+and `strict-child-init.log` record these runs. The independent review is
+in `../header-dependencies/review.json`. T10 remains open.
