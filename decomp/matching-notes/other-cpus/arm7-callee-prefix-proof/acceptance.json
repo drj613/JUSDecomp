@@ -17,7 +17,8 @@
     "llvm-decode.txt": "ff801ec399a5e3f333ef9337ae2d64520aad9a94bd03a330b6d0f6c90604cd2a",
     "original-read.json": "f3357064a764e2a74d0930f06aee9fc30e1b0f27800777d61acdd15791d487b5",
     "read_original.py": "de29a02abcbe418d8345ab529379440a456fb98be6ac14333adcd11ffd11cc84",
-    "requests.json": "91fc7b3da7000d67be18042a49e513a4d5ac474cb4430bb13a13ea21f33296ef"
+    "requests.json": "91fc7b3da7000d67be18042a49e513a4d5ac474cb4430bb13a13ea21f33296ef",
+    "independent/.gitattributes": "667b93be6ede617192a0c6ac9e3664b1727402239531277b6cd47b53e73a6535"
   },
   "source_bytes": 0,
   "T10_complete": false
