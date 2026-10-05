@@ -12,7 +12,8 @@
     "decomp/matching-notes/other-cpus/child-tool-approval/LICENSE.ds-decomp": "6868b9ef46509224c823cc2f80d2d0bbd37086f89bb3ce2a570c0b04f0bb4a7b",
     "decomp/matching-notes/other-cpus/child-tool-approval/source-audit.json": "a27012b829e547ed5668d472b2146a86fa75bbfccc4ae3c51db3df890eade203",
     "decomp/matching-notes/other-cpus/child-tool-approval/root-build.json": "31c2af082e1a2e4ea0adb1a5a40fb0ab359da23daf859427d9a30e11709290bf",
-    "decomp/matching-notes/other-cpus/child_compression_probe.rs": "9baf8ab864540b9eaca6b7916f57074459ce89b5b95bb98d62bfa2c3180783c6"
+    "decomp/matching-notes/other-cpus/child_compression_probe.rs": "9baf8ab864540b9eaca6b7916f57074459ce89b5b95bb98d62bfa2c3180783c6",
+    "decomp/matching-notes/other-cpus/child-tool-approval/LICENSE.ds-rom": "6868b9ef46509224c823cc2f80d2d0bbd37086f89bb3ce2a570c0b04f0bb4a7b"
   },
   "source_bytes": 0,
   "T10_complete": false
