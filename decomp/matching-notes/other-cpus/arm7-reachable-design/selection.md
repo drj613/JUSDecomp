@@ -13,3 +13,10 @@ Traversal visits each admissible selected instruction at most once per root. Ret
 The implementation belongs in new `analysis/arm7_reachable.rs`, an analysis-module export, one pinned research probe and public checked-fixture tests. Accepted source `7b3513f` stays frozen; develop in a new isolated worktree. The old sixteen-file physical approval capsule and canonical analyzer/tool-role pins remain unchanged. The new source and producer receive separate evidence and review.
 
 First prove the borrowed API with a failing test joining a direct call into a separately selected span. Then cover foreign identities and roots, duplicates and overlaps, omitted mappings, opposite-mode conflicts, Thumb BL interiors, BSS/unmapped/indirect frontiers, symbolic guards and finite cycles. Independent actual verification must reproduce both separate program graphs, the five-node/seven-transfer call chain, startup BLT cycle and unknown BX. Reports grant no function extent, executable classification, original relocation or source credit. T10 stays open.
+
+The first implementation preserves on-demand witnesses but returns
+`Result<Vec<&TransferObservation>, ConnectError>` from `witness()` so allocation
+failure is reported consistently with construction. This is an accepted narrow
+signature change. The direct-call test compiled and failed against a minimal
+stub, followed by thirteen failing public behavior contracts. Visit and edge
+examination counts provide evidence for the input-derived work bound.
