@@ -13,9 +13,11 @@ not establish a complete C++ class layout or justify naming unknown fields.
 
 The runtime target is `__FindExceptionTable`. Its classification is backed by the
 unique exact pinned dsd recognition pattern. The original two pool words equal
-the empty exception-index boundary. Existing project metadata lacks their
-link-time relocation records. Review a private-copy dry migration and pass the
-exact reference pipeline before any source promotion. Pattern recognition does
+the empty exception-index boundary. Current project metadata and its original ELF already contain both link-time
+relocation records. A private dry `find-exceptix` run changes no semantic metadata.
+The first read-only preparation report missed these records; raw ELF inspection
+corrected that premise before source work. Preserve the 87,493-slot reference
+inventory and pass the exact reference pipeline before any source promotion. Pattern recognition does
 not identify the exact original compiler or runtime version.
 
 Read-only preparation used local findings `allocator-arg3-is-line-number.md`,

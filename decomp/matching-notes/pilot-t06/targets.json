@@ -130,7 +130,9 @@
       "0x0208c5e4",
       "0x0208c5e4"
     ],
-    "required_metadata_migration": "Review dsd fix find-exceptix dry result, then verify two new literal RELAs and the exact full reference ROM before source experiments",
-    "exact_original_compiler_version": "unresolved"
+    "required_metadata_migration": "None. Current canonical metadata and original ELF already contain both R_ARM_ABS32 link-time pool relocations with addend zero. Private dry fix changes no semantic records. Verify existing reference ROM before source experiments.",
+    "exact_original_compiler_version": "unresolved",
+    "relocation_count_before_source": 87493,
+    "preparation_correction": "Earlier read-only report missed existing typed relocation records; raw original ELF and canonical metadata refute that claim."
   }
 }
