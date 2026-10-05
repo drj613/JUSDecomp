@@ -41,8 +41,11 @@ as initialized, BSS or unresolved bytes within that same program.
 Direct B/BL preserve source mode and share one destination classifier. Branch
 conditions, untaken fallthrough and conditional call-return continuation remain
 distinct observations. Ordinary fallthrough includes the span end; it is not a
-function-end claim. Numeric target arithmetic uses unarm's address-relative
-BranchDest with its existing pipeline bias exactly once. Branches inside a
+function-end claim. Numeric target arithmetic must apply the architectural pipeline bias exactly
+once. Tests exposed unarm1.9.2 ARM BranchDest sign-extending an already shifted
+displacement to24 rather than26 bits. The observer derives direct ARM B/BL
+from signed raw imm24 shifted two plusPC8; Thumb uses its validated parsed
+destination. This local interpretation fix changes no dependency or ARM9 path. Branches inside a
 combined Thumb BL must be classified as instruction interiors.
 
 BX and other PC writes remain unresolved, without fabricated register values,
@@ -92,3 +95,14 @@ ARM BX alignment was checked against ARM DDI0100I A4-20/A7-33 before retaining
 unknown exchange targets. No fabricated register values or hardware execution
 claim is introduced. Primary manual:
 https://e2e.ti.com/cfs-file/__key/communityserver-discussions-components-files/1023/ARM-Architecture.pdf
+
+## Concrete implementation deviation
+
+The initial compiled stub failed all nine behavior tests. The first implementation
+passed eight but misreported B to037f8468 as027f8468. Exact locked dependency
+arm/generated.rs6695 computes the signed field after shift using <<8>>8,
+truncating the26-bit scaled offset. Parent accepted local direct ARM B/BL
+normalization inside the observer, which owns target interpretation. The nine
+behavior tests then passed. Extreme positive/negative raw imm24 and formatted
+operand regressions remain required. This is one source-grounded correction,
+not recurring architecture friction or a reason to change the chosen boundary.
