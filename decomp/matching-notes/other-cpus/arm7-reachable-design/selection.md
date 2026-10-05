@@ -20,3 +20,5 @@ failure is reported consistently with construction. This is an accepted narrow
 signature change. The direct-call test compiled and failed against a minimal
 stub, followed by thirteen failing public behavior contracts. Visit and edge
 examination counts provide evidence for the input-derived work bound.
+
+Retained space includes per-root frontier capacity: `O(N + E + R*(N + E))`. Current checked observations emit at most three transfers per instruction (`E <= 3N`), so the selected design and source comment's `O(N + E + R*N)` bound is valid under that API invariant. A future observer that permits unbounded transfers per instruction must use the general bound.

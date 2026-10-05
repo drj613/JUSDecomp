@@ -31,7 +31,7 @@ The request contains separate full program identities, selected region/mode/exte
 
 Same-mode duplicates and overlaps reject atomically. Opposite-mode overlap blocks every intersecting whole instruction. Only a mapped initialized target with matching full program, CPU, region and required mode can join a selected instruction start. Thumb BL interiors, BSS, unresolved mappings, indirect transfers and unselected addresses remain frontiers. Adding another observation never repairs omitted byte ownership. Witnesses preserve every original transfer; they do not solve guard feasibility or establish that calls return.
 
-Each root visits at most N supplied instructions and examines at most E retained edges. Back edges stay in the graph. Predecessor/site indexes bound retained memory; a witness is materialized on demand and returns `Result` for allocation failure. Report size can be larger than retained graph storage.
+Each root visits at most N supplied instructions and examines at most E retained edges. Back edges stay in the graph. Retained graph and per-root predecessor/frontier storage use `O(N + E + R*(N + E))` space for R roots. The checked observer emits at most three transfers per instruction, so `E <= 3N` and this simplifies to the design bound `O(N + E + R*N)` for current API inputs. A witness is materialized on demand and returns `Result` for allocation failure. Report size can be larger than retained graph storage.
 
 ## Verified results
 
