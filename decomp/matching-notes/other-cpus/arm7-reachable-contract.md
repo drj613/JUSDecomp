@@ -110,13 +110,34 @@ ARM span `[0x037f8468,0x037f8470)` and its direct call at `0x037f846c` to
 The checked loader mapping puts it at stored-image offset `0x507c`, derived
 from autoload0's stored start `0x1b0` plus runtime offset `0x4ecc`.
 
-Those bytes independently decode as a stack save, stack adjustment, and BL at
+The three original little-endian words are `0xe92d4000`, `0xe24dd004`, and
+`0xeb000054`. The expected four transfers are:
+
+| Source | Kind and guard | Target in ARM mode | Selection boundary |
+| --- | --- | --- | --- |
+| `0x037fcecc` | fallthrough, always | `0x037fced0` | instruction start |
+| `0x037fced0` | fallthrough, always | `0x037fced4` | instruction start |
+| `0x037fced4` | call, always | `0x037fd02c` | outside selection |
+| `0x037fced4` | call continuation, call returned | `0x037fced8` | outside selection |
+
+All four targets map to the same program's initialized autoload0 bytes, without
+an executability claim. Those words independently decode as a stack save, stack
+adjustment, and BL at
 `0x037fced4`. Raw signed ARM branch arithmetic gives destination `0x037fd02c`.
 The guarded return continuation is `0x037fced8`. Both destinations remain outside
 this selection. Connecting the existing call edge to this new selected start
 exercises cross-selection ownership without guessing an end or recursively
 claiming either next destination. Repeat the fixture separately for both exact
 program identities, even though the selected byte digests match.
+
+The concrete caller is a bounded research probe starting from the already
+selected `0x037f8468` ARM seed. Joining the observations supplies an auditable
+candidate path from that root through call site `0x037f846c`, the selected
+instructions at `0x037fcecc`, and call site `0x037fced4` to frontier `0x037fd02c`.
+That identifies the next candidate callee address and its original caller chain
+for subsequent independent function mapping. A detached twelve-byte record
+cannot itself establish that root-relative chain or reject cross-program joins.
+The graph still contributes no function count or original function boundary.
 
 This grounding checked those bytes against the pinned original ROM and both
 checked-layout image digests. LLVM `llvm-mc --disassemble
@@ -138,13 +159,70 @@ Local ignored observations are in `build/reachable-grounding/observations.json`,
 SHA256 `694228421e131c7c390c57963f36812be7eb2f0cd60287e0d3a3a22dbb209167`.
 The selected-span manifest SHA256 is
 `4a8ce8f26c7189e5e4951c24bc5571d030d34688a64446b979dc82f183805299`.
-Only this metadata document is committed, with no original binary bytes.
+Only this metadata document is committed. No ROM or extracted binary file is
+committed.
+
+The inspected source is `/private/tmp/jus-arm7-physical-baseline-dsd` at the
+revision above. The reused observer source checkout is
+`/private/tmp/jus-arm7-analysis-design-bounded`, and its existing build output is
+`/private/tmp/jus-arm7-analysis-design-bounded/target/release/examples/arm7_observation_probe`.
+Neither checkout nor its cache was changed. The exact successful probe argv was:
+
+```sh
+/private/tmp/jus-arm7-analysis-design-bounded/target/release/examples/arm7_observation_probe \
+  /Users/djdjo/Documents/mine/rom/jus.nds \
+  /private/tmp/jus-arm7-reachable-contract/decomp/matching-notes/other-cpus/arm7-checked-layouts.json \
+  8a518abf785a1c24756d5485ee669f64e304af20a69b0d02a889fb60410d9fcc \
+  /private/tmp/jus-arm7-reachable-contract/build/reachable-grounding/spans.json \
+  4a8ce8f26c7189e5e4951c24bc5571d030d34688a64446b979dc82f183805299
+```
+
+The selected-span JSON is generated from each identity in the pinned layout,
+in original layout order, with these four selections in this order:
+
+```python
+selections = [
+    ('startup', 0x02380000, 0x0238002c),
+    ('startup', 0x023800c0, 0x023800cc),
+    ({'autoload': 0}, 0x037f8468, 0x037f8470),
+    ({'autoload': 0}, 0x037fcecc, 0x037fced8),
+]
+spans = [dict(program=row['identity'], region=region, mode='Arm',
+              extent=dict(start=start, end=end))
+         for row in layouts for region, start, end in selections]
+# json.dumps(spans, indent=2) + '\n' reproduces the pinned manifest bytes.
+```
 
 Before implementing the graph, invented fixtures need to distinguish a selected
 instruction start from a Thumb BL interior, keep call-return guards, stop at
 indirect PC writes, terminate cycles, preserve mode conflicts, and reject equal
 bytes under a foreign program identity. The actual twelve-byte fixture then
 checks the selected implementation against independent instruction evidence.
+
+## Narrow literal exchange alternative
+
+A separate bounded recognizer could record the operand value and checked target
+ownership for an AL PC-relative literal load followed by an AL `BX` using the
+same register. It would require exact instruction bytes, a complete checked
+four-byte literal read, no intervening clobber, checked address arithmetic, and
+explicit ARM/Thumb alignment checks. Such evidence can justify a candidate
+exchange target without claiming that the path executes or ends a function.
+
+The actual startup words are `0xe59f1030`, `0xe59fe030`, `0xe12fff11` at
+`0x023800c0`, `0x023800c4`, `0x023800c8`. The first load reads `r1` from
+`0x023800f8`, whose word is `0x037f8468`. The middle instruction loads `lr`, so a
+strict adjacent load/BX recognizer would not cover this real case. A separately
+proved exact three-instruction pattern could cover it without general constant
+propagation. The same candidate must still retain the unknown execution and
+function-extent fields; an operand value is not an execution trace.
+
+This alternative addresses the startup exchange frontier more directly than
+joining observations, but introduces value-flow and literal-read policy absent
+from the accepted observer. The smaller first step is the selected-span join,
+which uses existing getters and needs no new instruction semantics. A later
+literal recognizer can attach evidence at that graph's existing unknown edge.
+Neither approach establishes that every earlier startup branch was taken or
+that external RAM copy inputs were available.
 
 ## Why generic Function integration is premature
 
