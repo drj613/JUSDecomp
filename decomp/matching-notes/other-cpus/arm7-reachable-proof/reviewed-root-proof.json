@@ -1,5 +1,5 @@
 {
-  "status": "accepted_independent_source_root_and_public_bundle_review",
+  "status": "source_and_root_checks_accepted_pending_public_bundle_review",
   "source_base_commit": "7b3513f05adc88a1cca8b0365d3a3607a50a1b25",
   "source_commit": "71e766e562c78d4b0ec404b3b4edbe242a8d1b0f",
   "source_tree": "75215439eec429f6dd82df8a9f49bba054a16839",
@@ -133,11 +133,7 @@
     "worker/probe-rejections.json": "ec01e66aabe01e93156ca32dc494e29897b95011006e7ad82af33af36cdde5fd",
     "worker/release-feature-fingerprints.json": "d2986b455ab690e2e397b2d948fd8d91664eee9e215ec081b7b78b28d98802d6",
     "worker/release-recipe.json": "4e7c6c47784aed448f9535597e95bd1228a6a4c02fd859784a7e3eba2f94f951",
-    "worker/worker-summary.json": "855babeb7af29652bebf871201e1d88245a15a616136adf17f3634dd50e29d34",
-    "reviewed-root-proof.json": "b896d0881e14395a3619ee939171d6e7a999825327cda1b3dd98bc0c0a910fc1",
-    "public-final-accepted.json": "9e732430d7060defbcd5c6f10ffe7b0030c971aa326cc2e0d4d7a5eb0d9b0dbb",
-    "public-review-initial.json": "d1e58c51f4fc5354976f1dbb27585e37e90fa4bf3cc292648c47095620b71360",
-    "public-review-disposition.json": "257e9da9c5a727d5150e5cccb68eebf5ab0e082f4de435406165ae5078ae4ba3"
+    "worker/worker-summary.json": "855babeb7af29652bebf871201e1d88245a15a616136adf17f3634dd50e29d34"
   },
   "independent_source_review": "independent/independent-review.json",
   "independent_workspace_source_audit": {
@@ -150,8 +146,5 @@
     "before_after_identical": true
   },
   "independent_probe_rejections": 20,
-  "three_worker_root_reviewer_release_hashes_identical": true,
-  "public_bundle_review": "public-final-accepted.json",
-  "reviewed_root_proof": "reviewed-root-proof.json",
-  "reviewed_root_proof_sha256": "b896d0881e14395a3619ee939171d6e7a999825327cda1b3dd98bc0c0a910fc1"
+  "three_worker_root_reviewer_release_hashes_identical": true
 }
