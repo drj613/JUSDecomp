@@ -1,0 +1,4 @@
+*.log text eol=lf
+*.map text eol=lf
+*.txt text eol=lf
+*.log whitespace=-blank-at-eof
