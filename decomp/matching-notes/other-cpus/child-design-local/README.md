@@ -46,8 +46,8 @@ payload = child_operation.recheck(
 Without child selection the 19-stage parent path and optional 20-stage ARM7
 path stay unchanged. Selecting child requires the existing ARM7 mode and adds
 `child_arm9_native_roundtrip` after `arm7_native_baselines`, before `freshness`.
-The combined reference path has 21 stages. Source-enabled stage sequences retain
-their existing additions; these counts describe the reference path. Any selected
+The source-enabled path has 19/20/21 stages for default/ARM7/child modes.
+The corresponding reference-only path has 15/16/17 stages. Any selected
 child mode missing its operation, report, stage, approval, or inventory fails.
 The final stages remain `rom_roundtrip`, `rom_freshness`.
 
@@ -128,8 +128,8 @@ codec source inputs. Recheck the same closure immediately before publication.
 
 Packing derives local ARM9 `[0x4000,0x1e1874)` from checked header and FAT;
 only parent `[0x23f800,0x41d074)` is written. Independent child ARM7 writes parent
-`[0x41d200,0x4458b0)`. One occupied list includes all 17 parent ARM9 writes and
-both ARM7 writes. Reject duplicate, overlapping, header-crossing or out-of-program
+`[0x41d200,0x4458b0)`. One occupied list includes all 17 parent ARM9 writes, the child ARM9 write,
+and both ARM7 writes. Validate all 20 extents before applying any bytes. Reject duplicate, overlapping, header-crossing or out-of-program
 ranges. Preserve the 396-byte gap and all original child metadata and assets.
 Check whole child after both writes; retain existing whole parent proof.
 Never replace the complete child and then overlap it with an ARM7 write.
