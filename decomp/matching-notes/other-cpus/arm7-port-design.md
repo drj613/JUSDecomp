@@ -24,7 +24,7 @@ Header load and entry addresses are both `0x02380000`. The loader's parameter bl
 
 The initialized images total 165,528 bytes. The table completes the stored image, and BSS totals 21,424 bytes. Autoload0 BSS ends at `0x0380bc90`; autoload1 BSS ends at `0x027f9c08`. The table SHA256 is `43bedd33d998a1473ee2dc87eb859f5f75eb9939892c87978c1349700bd57a7f`.
 
-The root-owned `arm7-autoload-scope.json`, pending integration, records region hashes and loader evidence. Its inspected SHA256 is `452294add1024be6e19628a66e47ff703d4b4fa2ff53d9550de7c215932be16e`. ARM7's extracted `build_info: 0` is not an ARM9 module-parameter record or an SDK identity.
+The committed [arm7-autoload-scope.json](arm7-autoload-scope.json) records region hashes and loader evidence. Its inspected SHA256 is `452294add1024be6e19628a66e47ff703d4b4fa2ff53d9550de7c215932be16e`. ARM7's extracted `build_info: 0` is not an ARM9 module-parameter record or an SDK identity.
 
 ## Proposed interface
 
