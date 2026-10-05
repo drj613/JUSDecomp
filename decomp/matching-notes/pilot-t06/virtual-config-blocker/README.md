@@ -113,6 +113,15 @@ assert (w >> 28, (w >> 26) & 3, (w >> 25) & 1, (w >> 20) & 1, (w >> 16) & 15, (w
 w = word(0x0206cae4)
 assert (w >> 28, (w >> 25) & 1, (w >> 21) & 15, (w >> 16) & 15, w & 0xfff) == (14,1,10,4,0)
 assert word(0x0206cae8) >> 28 == 0 and branch(0x0206cae8) == 0x0206cb8c
-print('Eight hashes/modes,22 reference and linked relocations,three initial fields,and decisive failure-path instructions match.')
+print('Eight hashes/modes, 22 reference and linked relocations, three initial fields, and decisive failure-path instructions match.')
 PY
 ```
+
+## Independent verification
+
+Root runs the documented read-only check against the pinned original artifacts.
+The independent reviewer also reads the complete bounded target/helper code,
+the virtual-call records and inbound reference inventory.
+[Root verification](root-verification.json) records the verified static
+blocker and the unresolved live reachability and caller invariant. No source
+candidate or compiler trial is introduced; canonical coverage stays 304 bytes.
