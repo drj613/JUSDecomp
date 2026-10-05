@@ -112,6 +112,16 @@ reads both original programs, inspects the real ELF, invokes LLVM, and records
 the mismatch and wrong-binding rejection. It deliberately has no LLD invocation.
 Objects remain private and are not needed as input on a fresh checkout.
 
+After public replay, run the tests from the repository root, pointing
+`TRIAL_OBJECT` at the object that replay generated:
+
+```sh
+TRIAL_OBJECT=NEW_PRIVATE_DIRECTORY/compiled.o python3 -m unittest discover -s decomp/matching-notes/other-cpus/arm7-low-getter-trial-proof -p 'test_*.py' -v
+```
+
+Replace `NEW_PRIVATE_DIRECTORY` with the same absolute output path used for
+replay. The parser/pool tests require this explicit actual-object input.
+
 The parser/pool tests failed before implementation, then all three passed using
 the actual MW object. A separate replay test failed before its implementation,
 then passed with a fresh real compile and the expected stop-before-link verdict.
