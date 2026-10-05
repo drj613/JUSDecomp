@@ -62,6 +62,8 @@ def normalized_bytes(record):
             high, low = struct.unpack_from('<HH', value, offset)
             if high & 0xF800 != 0xF000 or low & 0xF800 not in (0xF800, 0xE800):
                 raise ValueError('unsupported Thumb branch instruction')
+            if low & 0xF800 == 0xE800 and low & 1:
+                raise ValueError('invalid Thumb BLX alignment encoding')
             struct.pack_into('<HH', value, offset, 0xF000, low & 0xF800)
         else:
             raise ValueError('unsupported relocation type')

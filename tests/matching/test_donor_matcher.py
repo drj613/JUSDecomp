@@ -108,6 +108,17 @@ class DonorMatcherTests(unittest.TestCase):
                 self.assertNotEqual(m.normalized_bytes(left),m.normalized_bytes(right))
                 self.assertNotEqual(m.compare_functions(left,right,{'callee':destination})['status'],'candidate')
 
+    def test_invalid_thumb_blx_alignment_never_becomes_candidate(self):
+        m=self.module()
+        destination={'cpu':'arm9','module':'main','address':0x02003000,'mode':'arm'}
+        reloc={'offset':0,'type':10,'addend':-4,'symbol':'callee','destination':destination}
+        valid=record(mode='thumb',bytes=struct.pack('<HH',0xF000,0xE800)+bytes(20),relocations=[reloc])
+        invalid=dict(valid,bytes=struct.pack('<HH',0xF000,0xE801)+bytes(20))
+        with self.assertRaisesRegex(ValueError,'BLX alignment'):
+            m.normalized_bytes(invalid)
+        for left,right in ((invalid,valid),(valid,invalid),(invalid,invalid)):
+            self.assertNotEqual(m.compare_functions(left,right,{'callee':destination})['status'],'candidate')
+
     def test_unlicensed_donor_cannot_enter_corpus(self):
         m=self.module();self.assertTrue(hasattr(m,'license_allowed'),'license exclusion missing')
         self.assertFalse(m.license_allowed({}))
