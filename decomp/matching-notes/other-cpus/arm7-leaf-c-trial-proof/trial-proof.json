@@ -9,8 +9,8 @@
     "/private/tmp/jus-track-a/tools/mwccarm/2.0/base/lmgr8c.dll": "5e675fab488177d5e285d2033d09db9e144f5a50cfb78aed176c5b1715e5afd9",
     "/Users/djdjo/Documents/mine/rom/jus.nds": "a9c9bf89e6d99548b7c87e822b217c3fb74ef25186535b06193a6fb73d0d6d27",
     "/private/tmp/jus-track-a/decomp/matching-notes/other-cpus/arm7-checked-layouts.json": "8a518abf785a1c24756d5485ee669f64e304af20a69b0d02a889fb60410d9fcc",
-    "/private/tmp/jus-arm7-leaf-worker-proof/store_trial.c": "a6457f199a58403507cc0262b1187ebccd1df05190d50771c6a9ae9eafa24abb",
-    "/private/tmp/jus-arm7-leaf-triage-proof/triage.json": "bc8ee39a731209b5a6158f6b2099d3c6ee5ff5a50579938dae9d5d272e374f42"
+    "/private/tmp/jus-arm7-leaf-trial/decomp/matching-notes/other-cpus/arm7-leaf-c-trial-proof/store_trial.c": "a6457f199a58403507cc0262b1187ebccd1df05190d50771c6a9ae9eafa24abb",
+    "/private/tmp/jus-arm7-leaf-trial/decomp/matching-notes/other-cpus/arm7-leaf-c-trial-proof/triage.json": "bc8ee39a731209b5a6158f6b2099d3c6ee5ff5a50579938dae9d5d272e374f42"
   },
   "llvm_tool_sha256": {
     "llvm-mc": "76de9d4a660f3e1f6dc8175c5d443197f953eaa4df2871406a19d789b1a34ba0",
@@ -165,9 +165,9 @@
         "-interworking",
         "-nostdinc",
         "-c",
-        "/private/tmp/jus-arm7-leaf-worker-proof/store_trial.c",
+        "/private/tmp/jus-arm7-leaf-trial/decomp/matching-notes/other-cpus/arm7-leaf-c-trial-proof/store_trial.c",
         "-o",
-        "/private/tmp/jus-arm7-leaf-worker-proof/reproduced/baseline/compiled.o"
+        "/private/tmp/jus-arm7-leaf-worker-proof/reproduced-closed/baseline/compiled.o"
       ],
       "returncode": 0,
       "compiler_stdout": "",
@@ -353,9 +353,9 @@
         "-nostdinc",
         "-O4,p",
         "-c",
-        "/private/tmp/jus-arm7-leaf-worker-proof/store_trial.c",
+        "/private/tmp/jus-arm7-leaf-trial/decomp/matching-notes/other-cpus/arm7-leaf-c-trial-proof/store_trial.c",
         "-o",
-        "/private/tmp/jus-arm7-leaf-worker-proof/reproduced/O4p/compiled.o"
+        "/private/tmp/jus-arm7-leaf-worker-proof/reproduced-closed/O4p/compiled.o"
       ],
       "returncode": 0,
       "compiler_stdout": "",
@@ -494,6 +494,7 @@
       "file": "probe-037fcf18.json",
       "sha256": "bb7acfeaa275037156122c1c6eeb3e3734afd4fb1e2d0f2bd50e0f970a3a3255",
       "request_sha256": "2f15e6c18c4e1af2122a3cf346ac408c5500875ca1f4cf89cfacad8765d07a97",
+      "request_file": "request-037fcf18.json",
       "producer_sha256": "28e47852e593d3636d66c797c67963f5c052840c7e0e171ea7dd0dd1bda497ff",
       "status": "bounded_arm7_candidate_graphs_verified",
       "inputs_unchanged": true
@@ -502,6 +503,7 @@
       "file": "probe-037fcf2c.json",
       "sha256": "d3bbfb1c883ef51b0116efc86111a3f0d7de440ee0a7d152defdf0f7777844c2",
       "request_sha256": "1f20b656d17cc3954923d484569e9c9c9bac034e5664120e8cb38c03b83cc639",
+      "request_file": "request-037fcf2c.json",
       "producer_sha256": "28e47852e593d3636d66c797c67963f5c052840c7e0e171ea7dd0dd1bda497ff",
       "status": "bounded_arm7_candidate_graphs_verified",
       "inputs_unchanged": true
@@ -510,6 +512,7 @@
       "file": "probe-037fcf84.json",
       "sha256": "90681bbfcadd312d0752bc85a7f7297c15668aa75dd2e30f38e8a81a809d5321",
       "request_sha256": "3d0d70d7888709e891b396f062f0cf745f4017497c437ced67e6e8cf1316ab85",
+      "request_file": "request-037fcf84.json",
       "producer_sha256": "28e47852e593d3636d66c797c67963f5c052840c7e0e171ea7dd0dd1bda497ff",
       "status": "bounded_arm7_candidate_graphs_verified",
       "inputs_unchanged": true
@@ -518,6 +521,7 @@
       "file": "probe-caller-context.json",
       "sha256": "dd0e677b9be8483672fb9a0d556edab6484e485cbaf6132f279d4492b1d2d913",
       "request_sha256": "caa85b73f08f74c178b41a4ed849f6386916f84f52bb725e2bdc657722b08012",
+      "request_file": "request-caller-context.json",
       "producer_sha256": "28e47852e593d3636d66c797c67963f5c052840c7e0e171ea7dd0dd1bda497ff",
       "status": "bounded_arm7_candidate_graphs_verified",
       "inputs_unchanged": true
@@ -526,6 +530,7 @@
       "file": "probe-cf18-predecessor.json",
       "sha256": "012561128d448c9077a6225b957dbd8b41a2b3f408bd4cbf36d10138c7051719",
       "request_sha256": "668497fa776bbe646f529c7a5c7a05db0dc7df66331c9aedf0495a014c798d95",
+      "request_file": "request-cf18-predecessor.json",
       "producer_sha256": "28e47852e593d3636d66c797c67963f5c052840c7e0e171ea7dd0dd1bda497ff",
       "status": "bounded_arm7_candidate_graphs_verified",
       "inputs_unchanged": true

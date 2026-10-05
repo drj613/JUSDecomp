@@ -1,5 +1,5 @@
 
-File: /private/tmp/jus-arm7-leaf-worker-proof/reproduced/baseline/compiled.o
+File: /private/tmp/jus-arm7-leaf-worker-proof/reproduced-closed/baseline/compiled.o
 Format: elf32-littlearm
 Arch: arm
 AddressSize: 32bit

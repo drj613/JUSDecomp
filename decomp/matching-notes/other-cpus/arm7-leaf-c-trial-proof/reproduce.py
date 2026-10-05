@@ -19,7 +19,8 @@ LAYOUT = Path('/private/tmp/jus-track-a/decomp/matching-notes/other-cpus/arm7-ch
 COMPILER = Path('/private/tmp/jus-track-a/tools/mwccarm/2.0/base/mwccarm.exe')
 RUNNER = Path('/private/tmp/jus-track-a/tools/wibo/wibo-macos')
 LLVM = Path('/opt/homebrew/opt/llvm/bin')
-TRIAGE = Path('/private/tmp/jus-arm7-leaf-triage-proof')
+TRIAGE = HERE / 'triage'
+TRIAGE_METADATA = HERE / 'triage.json'
 START, END = 0x037fcf18, 0x037fcf2c
 SOURCE_SHA = 'a6457f199a58403507cc0262b1187ebccd1df05190d50771c6a9ae9eafa24abb'
 ORIGINAL_SHA = '1286c0f7baaf3678f915ee9ef9830ab1a2243c5ea8d41e2a75c0b14fa35eaebe'
@@ -32,7 +33,7 @@ PINNED = {
     ROM: 'a9c9bf89e6d99548b7c87e822b217c3fb74ef25186535b06193a6fb73d0d6d27',
     LAYOUT: '8a518abf785a1c24756d5485ee669f64e304af20a69b0d02a889fb60410d9fcc',
     SOURCE: SOURCE_SHA,
-    TRIAGE / 'triage.json': 'bc8ee39a731209b5a6158f6b2099d3c6ee5ff5a50579938dae9d5d272e374f42',
+    TRIAGE_METADATA: 'bc8ee39a731209b5a6158f6b2099d3c6ee5ff5a50579938dae9d5d272e374f42',
 }
 
 
@@ -200,13 +201,17 @@ for name, optimization in [('baseline', []), ('O4p', ['-O4,p'])]:
     print(name, 'bytes', len(code), 'exact original both programs', code == payload)
 assert len(trials) == 2 and trials[0]['elf']['text_bytes'] == 36 and not trials[0]['exact_original_bytes_both_programs']
 assert trials[1]['elf']['text_bytes'] == 20 and trials[1]['exact_original_bytes_both_programs']
-triage = json.loads((TRIAGE / 'triage.json').read_text())
+triage = json.loads(TRIAGE_METADATA.read_text())
 receipts = []
 for name, digest in triage['artifacts_sha256'].items():
     blob = (TRIAGE / name).read_bytes()
     assert sha(blob) == digest
     receipt = json.loads(blob)
+    request_name = name.replace('probe-', 'request-', 1)
+    request = (TRIAGE / request_name).read_bytes()
+    assert sha(request) == receipt['request_sidecar_sha256']
     receipts.append({'file': name, 'sha256': digest, 'request_sha256': receipt['request_sidecar_sha256'],
+                     'request_file': request_name,
                      'producer_sha256': receipt['producer_sha256'], 'status': receipt['status'],
                      'inputs_unchanged': receipt['inputs_unchanged']})
 for path, digest in PINNED.items():

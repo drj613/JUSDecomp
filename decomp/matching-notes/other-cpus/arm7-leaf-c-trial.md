@@ -29,8 +29,11 @@ original function boundary. Triage source revision is
 `28e47852e593d3636d66c797c67963f5c052840c7e0e171ea7dd0dd1bda497ff`.
 The supplied triage metadata SHA256 is
 `bc8ee39a731209b5a6158f6b2099d3c6ee5ff5a50579938dae9d5d272e374f42`.
-The trial script rechecks all five pinned triage receipts; their hashes and
-request digests remain in [trial-proof.json](arm7-leaf-c-trial-proof/trial-proof.json).
+The [packaged triage inputs](arm7-leaf-c-trial-proof/triage/) retain all five exact
+probe reports and their five matching request sidecars. The trial script reads
+them beside its own committed triage metadata, rechecking every report hash and
+request digest. Their names and pins remain in
+[trial-proof.json](arm7-leaf-c-trial-proof/trial-proof.json).
 
 ## Source hypothesis and original register facts
 
@@ -148,9 +151,11 @@ source/tool/DLL pins, full identities, checked original reads, exact recipes,
 object and compiled-byte pins, symbols/sections/modes, relocations, mismatches,
 triage receipt hashes, and the zero-credit claims.
 
-The proof script was run against fresh private directory
-`/private/tmp/jus-arm7-leaf-worker-proof/reproduced`. That directory retains the
-objects and compiler logs. The committed original and compiled LLVM outputs
+The proof script was run from its published package against fresh private
+directory `/private/tmp/jus-arm7-leaf-worker-proof/reproduced-closed`. That
+directory retains the objects and compiler logs. The script consumes its own
+published C source and packaged triage metadata, reports, and requests. No
+private triage directory is required. The committed original and compiled LLVM outputs
 and ELF readbacks are metadata only. No object, extracted binary, ROM, canonical
 source change, or build output is committed. Scoped attributes preserve literal
 LLVM/readback LF bytes. Reproduction accepts a new output directory:
@@ -159,6 +164,10 @@ LLVM/readback LF bytes. Reproduction accepts a new output directory:
 python3 decomp/matching-notes/other-cpus/arm7-leaf-c-trial-proof/reproduce.py \
   /private/tmp/jus-arm7-leaf-independent-reproduction
 ```
+
+The pinned compiler, runner, adjacent DLLs, original ROM, checked layout, and
+native LLVM tools remain external read-only prerequisites at the recorded paths.
+All trial source and triage provenance inputs are present in the published package.
 
 ## Remaining promotion barriers
 
