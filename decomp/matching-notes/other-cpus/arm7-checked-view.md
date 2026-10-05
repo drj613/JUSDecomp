@@ -21,8 +21,10 @@ and every region hash. It requires contiguous physical coverage ending at the
 image boundary, word alignment, checked arithmetic, and nonoverlapping
 initialized-plus-BSS runtime extents. NitroFS selection uses ds-rom's existing
 FNT/FAT and program parser with bounded preflight and requires an exact file.
-Directory aliases, malformed extents, duplicate names, and directory cycles
-reject before a view is returned.
+Directory aliases, malformed extents, decoder errors, duplicate decoded
+sibling names, and directory cycles reject before a view is returned. Overlay
+counts and extents are checked before ds-rom parsing; every FNT file ID must
+be outside its reserved overlay range.
 
 The actual proof [arm7-checked-view-proof.json](arm7-checked-view-proof.json)
 checks both program instances against the private original, with unchanged
@@ -33,7 +35,7 @@ fixtures only.
 
 ## Reproduce
 
-The candidate source revision is `72c88e1ba70bd259d50cac6a1eeba4bcc5faa851`, based
+The candidate source revision is `0ef447312649db7412ddd98fe0b2b23beb5bd196`, based
 on the independently reproduced child-SWI repair
 `78630f8f54835e0e627cd4e45a9626d88c307f8b` (tree
 `5b6bef54e46e46e08d3243f56c2cb419bbd209d9`). The durable
@@ -41,8 +43,8 @@ on the independently reproduced child-SWI repair
 For a fresh upstream checkout, first apply `dsd-child-swi.patch` to upstream
 `9f6c1b11c8f4b384ffcdc75b2c6d863cd371dcfe`, then this patch. The proof records
 candidate tree, lock, patch, native probe, and native dsd hashes; production
-pins are unchanged. Only direct membership of already locked sha2 0.10.9 and
-example-only serde_json 1.0.149 changes in Cargo.lock.
+pins are unchanged. Only direct membership of already locked sha2 0.10.9, encoding_rs 0.8.35,
+and example-only serde_json 1.0.149 changes in Cargo.lock.
 
 From the isolated source checkout, with `JUS_NOTES` pointing to this directory
 and `PRIVATE_ROM` pointing to the private original:
@@ -63,9 +65,12 @@ cargo build --locked --offline --profile release-fast -p ds-decomp-cli
   8a518abf785a1c24756d5485ee669f64e304af20a69b0d02a889fb60410d9fcc
 ```
 
-There are 19 public fixture tests plus 5 existing library tests. Red runs
+There are 24 public fixture tests plus 5 existing library tests. Red runs
 preceded the view API, exact-file repair, and separate header/parameter hash
-pins. A wrong sidecar digest exits 1 with `layout sidecar hash mismatch`.
+pins. Review regressions first reproduced a reserved-overlay ID panic,
+malformed-name acceptance, and a valid Shift-JIS decoded alias. The reviewer
+control now exits 0; both defect reproducers exit 1 with `Error: NitroFs`.
+A single valid Shift-JIS name remains selectable. A wrong sidecar digest exits 1 with `layout sidecar hash mismatch`.
 Clippy's allowed lint covers existing `ctor.rs` and `functions.rs` patterns
 flagged by the recorded Rust 1.98.1 toolchain. No existing analyzer code changes.
 

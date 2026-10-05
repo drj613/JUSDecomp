@@ -1,8 +1,12 @@
 diff --git a/Cargo.lock b/Cargo.lock
-index 7bfc236..fe284bb 100644
+index 7bfc236..cb8907d 100644
 --- a/Cargo.lock
 +++ b/Cargo.lock
-@@ -709,6 +709,8 @@ dependencies = [
+@@ -706,9 +706,12 @@ version = "0.12.0"
+ dependencies = [
+  "bytemuck",
+  "ds-rom",
++ "encoding_rs",
   "log",
   "serde",
   "serde-saphyr",
@@ -12,18 +16,21 @@ index 7bfc236..fe284bb 100644
   "strum",
   "strum_macros",
 diff --git a/lib/Cargo.toml b/lib/Cargo.toml
-index 5103d56..705d546 100644
+index 5103d56..81f14dd 100644
 --- a/lib/Cargo.toml
 +++ b/lib/Cargo.toml
-@@ -13,6 +13,7 @@ bytemuck = { version = "1.25", features = ["derive"] }
+@@ -11,8 +11,10 @@ description = "Library for ds-decomp, a DS decompilation toolkit."
+ [dependencies]
+ bytemuck = { version = "1.25", features = ["derive"] }
  ds-rom = "0.8"
++encoding_rs = "=0.8.35"
  log = "0.4"
  serde = "1.0"
 +sha2 = "=0.10.9"
  serde-saphyr = "0.0"
  snafu = { version = "0.8", features = ["backtrace"] }
  strum = "0.28.0"
-@@ -23,6 +24,9 @@ unarm = { version = "1.8", default-features = false, features = [
+@@ -23,6 +25,9 @@ unarm = { version = "1.8", default-features = false, features = [
      "v5te",
  ] }
  
@@ -88,14 +95,15 @@ index 0000000..9db6e8e
 +}
 diff --git a/lib/src/rom/arm7.rs b/lib/src/rom/arm7.rs
 new file mode 100644
-index 0000000..cb0440c
+index 0000000..de1bca0
 --- /dev/null
 +++ b/lib/src/rom/arm7.rs
-@@ -0,0 +1,479 @@
+@@ -0,0 +1,490 @@
 +//! Checked ARM7 physical views. No function analysis or source credit is inferred.
 +use std::{collections::HashSet, error::Error, fmt, ops::Range};
 +
 +use ds_rom::rom::{FileSystem, raw};
++use encoding_rs::SHIFT_JIS;
 +use serde::{Deserialize, Serialize};
 +use sha2::{Digest, Sha256};
 +
@@ -466,17 +474,22 @@ index 0000000..cb0440c
 +    for record in fat.as_chunks::<8>().0 {
 +        slice(parent, word(record, 0)?..word(record, 4)?)?;
 +    }
-+    preflight_fnt(fnt, fat.len() / 8)?;
-+    let fnt = rom.fnt().map_err(|_| Arm7LayoutError::NitroFs)?;
-+    let fat = rom.fat().map_err(|_| Arm7LayoutError::NitroFs)?;
-+    if header.arm9_overlays.size % 32 != 0
-+        || header.arm7_overlays.size % 32 != 0
-+        || rom.num_arm9_overlays().map_err(|_| Arm7LayoutError::NitroFs)?
-+            + rom.num_arm7_overlays().map_err(|_| Arm7LayoutError::NitroFs)?
-+            > fat.len()
-+    {
++    let mut reserved_files = 0u32;
++    for overlays in [header.arm9_overlays, header.arm7_overlays] {
++        aligned(&[overlays.offset])?;
++        if overlays.size % 32 != 0 {
++            return Err(Arm7LayoutError::NitroFs);
++        }
++        slice(parent, overlays.offset..add(overlays.offset, overlays.size)?)?;
++        reserved_files = add(reserved_files, overlays.size / 32)?;
++    }
++    let reserved_files = reserved_files as usize;
++    if reserved_files > fat.len() / 8 {
 +        return Err(Arm7LayoutError::NitroFs);
 +    }
++    preflight_fnt(fnt, fat.len() / 8, reserved_files)?;
++    let fnt = rom.fnt().map_err(|_| Arm7LayoutError::NitroFs)?;
++    let fat = rom.fat().map_err(|_| Arm7LayoutError::NitroFs)?;
 +    let files = FileSystem::parse(&fnt, fat, &rom).map_err(|_| Arm7LayoutError::NitroFs)?;
 +    let mut directory = 0;
 +    let parts: Vec<_> = path.split('/').collect();
@@ -508,7 +521,11 @@ index 0000000..cb0440c
 +
 +// ds-rom's raw FNT parser assumes valid ranges and recursive directory structure.
 +// Validate those assumptions before passing caller-supplied bytes into it.
-+fn preflight_fnt(fnt: &[u8], fat_count: usize) -> Result<(), Arm7LayoutError> {
++fn preflight_fnt(
++    fnt: &[u8],
++    fat_count: usize,
++    reserved_files: usize,
++) -> Result<(), Arm7LayoutError> {
 +    let root = slice(fnt, 0..8)?;
 +    let count = u16::from_le_bytes(root[6..8].try_into().unwrap()) as usize;
 +    if count == 0 || count >= 0x1000 || count * 8 > fnt.len() {
@@ -538,7 +555,8 @@ index 0000000..cb0440c
 +            if cursor > fnt.len() {
 +                return Err(Arm7LayoutError::NitroFs);
 +            }
-+            if !names.insert(&fnt[name_start..cursor]) {
++            let (name, _, had_errors) = SHIFT_JIS.decode(&fnt[name_start..cursor]);
++            if had_errors || !names.insert(name.into_owned()) {
 +                return Err(Arm7LayoutError::NitroFs);
 +            }
 +            if flags & 0x80 != 0 {
@@ -550,7 +568,7 @@ index 0000000..cb0440c
 +                edges.push(id as usize - 0xf000);
 +                cursor += 2;
 +            } else {
-+                if file_id >= fat_count || file_id >= 0xf000 {
++                if file_id < reserved_files || file_id >= fat_count || file_id >= 0xf000 {
 +                    return Err(Arm7LayoutError::NitroFs);
 +                }
 +                file_id += 1;
@@ -580,10 +598,10 @@ index d193c05..6598f56 100644
  pub mod rom;
 diff --git a/lib/tests/arm7_checked_view.rs b/lib/tests/arm7_checked_view.rs
 new file mode 100644
-index 0000000..69a77a0
+index 0000000..174f4f4
 --- /dev/null
 +++ b/lib/tests/arm7_checked_view.rs
-@@ -0,0 +1,333 @@
+@@ -0,0 +1,417 @@
 +use ds_decomp::rom::arm7::{
 +    Arm7Layout, Arm7LayoutError, Arm7Region, Arm7RegionKind, Cpu, InstructionSet, Processor,
 +    ProgramIdentity, ProgramSelector, TargetPolicy,
@@ -916,4 +934,88 @@ index 0000000..69a77a0
 +    let mut layout = f.parent_layout.clone();
 +    layout.params_sha256 = "0".repeat(64);
 +    assert!(matches!(layout.checked(&f.parent), Err(Arm7LayoutError::Hash("parameters"))));
++}
++
++#[test]
++fn nitrofs_overlay_reserved_file_id_rejects_without_panic() {
++    for size_word in [0x54, 0x5c] {
++        let mut f = Fixture::new();
++        put(&mut f.parent, size_word, 32);
++        f.child_layout.identity.parent_rom_sha256 = sha(&f.parent);
++        let result = std::panic::catch_unwind(|| f.child_layout.checked(&f.parent));
++        assert!(matches!(result, Ok(Err(Arm7LayoutError::NitroFs))));
++    }
++}
++
++#[test]
++fn nitrofs_decoding_errors_and_decoded_sibling_aliases_reject() {
++    let mut accepted = Vec::new();
++    for (names, selected) in [
++        (vec![1, 0x81, 1, 0x82, 0], "\u{fffd}"),
++        (vec![2, 0x87, 0x90, 2, 0x81, 0xe0, 0], "\u{2252}"),
++    ] {
++        let mut f = Fixture::new();
++        f.parent[0x501c..0x501c + names.len()].copy_from_slice(&names);
++        put(&mut f.parent, 0x4c, 16);
++        put(&mut f.parent, 0x5108, 0x6000);
++        put(&mut f.parent, 0x510c, 0xb000);
++        f.child_layout.identity.parent_rom_sha256 = sha(&f.parent);
++        f.child_layout.identity.program =
++            ProgramSelector::NitroFs { path: format!("ChildRom/{selected}") };
++        if !matches!(f.child_layout.checked(&f.parent), Err(Arm7LayoutError::NitroFs)) {
++            accepted.push(selected);
++        }
++    }
++    assert!(accepted.is_empty(), "accepted decoded names {accepted:?}");
++}
++
++#[test]
++fn nitrofs_overlay_extent_and_count_arithmetic_rejects() {
++    for (offset, size, expected) in [
++        (0xfffffff0, 32, Arm7LayoutError::Overflow),
++        (0xc000, 32, Arm7LayoutError::Bounds),
++        (0x5201, 32, Arm7LayoutError::Alignment),
++        (0x5200, 96, Arm7LayoutError::NitroFs),
++        (0x5200, 33, Arm7LayoutError::NitroFs),
++    ] {
++        let mut f = Fixture::new();
++        put(&mut f.parent, 0x4c, 16);
++        f.parent[0x500c..0x500e].copy_from_slice(&1u16.to_le_bytes());
++        put(&mut f.parent, 0x5108, 0x6000);
++        put(&mut f.parent, 0x510c, 0xb000);
++        put(&mut f.parent, 0x50, offset);
++        put(&mut f.parent, 0x54, size);
++        f.child_layout.identity.parent_rom_sha256 = sha(&f.parent);
++        let result = std::panic::catch_unwind(|| f.child_layout.checked(&f.parent));
++        assert!(
++            matches!(result, Ok(Err(error)) if error == expected),
++            "wrong rejection for overlay offset {offset:x} size {size}"
++        );
++    }
++}
++
++#[test]
++fn nitrofs_valid_overlay_reservation_remains_selectable() {
++    let mut f = Fixture::new();
++    put(&mut f.parent, 0x4c, 16);
++    f.parent[0x500c..0x500e].copy_from_slice(&1u16.to_le_bytes());
++    put(&mut f.parent, 0x5108, 0x6000);
++    put(&mut f.parent, 0x510c, 0xb000);
++    put(&mut f.parent, 0x50, 0x5200);
++    put(&mut f.parent, 0x54, 32);
++    f.child_layout.identity.parent_rom_sha256 = sha(&f.parent);
++    let view = f.child_layout.checked(&f.parent).unwrap();
++    assert_eq!(view.startup().bytes().len(), 64);
++    assert_eq!(view.matched_source_bytes(), 0);
++}
++
++#[test]
++fn nitrofs_valid_shift_jis_name_remains_selectable() {
++    let mut f = Fixture::new();
++    f.parent[0x501c..0x5020].copy_from_slice(&[2, 0x87, 0x90, 0]);
++    f.child_layout.identity.parent_rom_sha256 = sha(&f.parent);
++    f.child_layout.identity.program = ProgramSelector::NitroFs { path: "ChildRom/\u{2252}".into() };
++    let view = f.child_layout.checked(&f.parent).unwrap();
++    assert_eq!(view.startup().bytes().len(), 64);
++    assert_eq!(view.matched_source_bytes(), 0);
 +}
