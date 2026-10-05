@@ -8,12 +8,18 @@
   "branch": "track-a/matching",
   "dsd": {
     "version": "0.12.0",
-    "source_commit": "9f6c1b11c8f4b384ffcdc75b2c6d863cd371dcfe",
-    "asset": "dsd-macos-arm64",
-    "url": "https://github.com/AetiasHax/ds-decomp/releases/download/v0.12.0/dsd-macos-arm64",
-    "sha256": "2225874387adb0a5b2b4c4912337786efd736aca93b9f92617c95abba61d04f5",
+    "source_commit": "bee60e2ee89308616933a391c387928e2dfb5c07",
+    "asset": "experimental-local-arm7-module-input-build",
+    "url": null,
+    "sha256": "ac10a6f214c6f5c5ba8696839a25a0671313452daa167f7a3282260fce286905",
     "verified_version_output": "ds-decomp-cli 0.12.0",
-    "equivalence_to_upstream_windows_binary": "not_verified"
+    "equivalence_to_upstream_windows_binary": "not_verified",
+    "experimental_build": {
+      "source_tree": "9bdb5141422bace5f700c2d4e82bcd716fa8b04c",
+      "patch_base": "0ef447312649db7412ddd98fe0b2b23beb5bd196",
+      "patch_sha256": "0001c73030992c6e8b41f23b32795736c9ee9cabfe19b81a630764b630f7da32",
+      "canonical_production_pin_changed": false
+    }
   },
   "mwldarm": {
     "required": true,
