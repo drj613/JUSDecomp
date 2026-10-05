@@ -1,0 +1,21 @@
+{
+  "bead": "jus-bjry.4",
+  "status": "completed_experiments_compiler_identity_unresolved",
+  "targets": 4,
+  "compiler_packages": 24,
+  "contexts_per_target": 3,
+  "successful_compilations": 288,
+  "exact_original_matches": 0,
+  "source_promotions": 0,
+  "public_tests": {
+    "tests": 9,
+    "all_matching_tests": 88,
+    "skipped": 1,
+    "result": "passed"
+  },
+  "reproduction": {
+    "reference_split_exit_status": 0,
+    "all_four_reference_hashes_reproduced": true
+  },
+  "report_sha256": "f00514056af802c2bd3a2d33943aeea2a62618d473ff4290fca3e960351b308b"
+}
