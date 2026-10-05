@@ -2,8 +2,9 @@
 
 These notes describe `func_0206c244` and `func_0206ca8c` from the original
 program. Both remain reference inputs. This research adds zero source credit.
-The current checkpoint is [104 source bytes](../README.md#current-verified-source-coverage),
-72 game bytes and 32 SDK bytes. The private ELF inspected here is an earlier
+Research began at the 104-byte source checkpoint, comprising 72 game bytes
+and 32 SDK bytes. See the [current source checkpoint](../README.md#current-verified-source-coverage)
+for later promotions. The private ELF inspected here is an earlier
 76-byte checkpoint. Its two researched function bodies match the hashes in the
 [pre-source target publication](../targets.json).
 

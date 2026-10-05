@@ -63,7 +63,7 @@ under flag `0x10`. Several saved registers are only initialized on nonzero
 lookup but used after falling-through failure paths. The caller invariant is
 not yet established; candidate source must preserve the observed behavior.
 
-## Current verified source coverage
+## Deleting-destructor promotion checkpoint
 
 Producer `c7c61f2` adds the 28-byte deleting-destructor entry `func_0206cfa4`.
 The [fresh root report](class/deleting/root-canonical-report.json) passes all
@@ -73,3 +73,20 @@ bytes and 12 literal bytes. All 206 tests pass without skips.
 Five published class targets remain exact fallback. The [entry's ABI limits](class/deleting/README.md)
 preserve the observed call and return interface without asserting ownership.
 T06 remains open and the global source percentage remains unknown.
+
+## Current verified source coverage
+
+Producer `4457e49` adds the 56-byte factory `func_0206c57c`. Its
+[fresh root report](class/factory/root-canonical-report.json) passes all 19
+stages and exact whole-ROM comparison with five selected source units.
+Coverage is 160 bytes: 128 game and 32 SDK, comprising 136 instruction bytes
+and 24 literal bytes. All 208 tests pass without skips. Four published class
+targets remain exact fallback; T06 remains open.
+
+The factory preserves the observed allocation-null and constructor-return
+paths. The callback is an address token here; its original C++ type remains
+unknown. The original constructor forwards incoming `r1` and sets only `r2`
+to zero before its base-constructor call, as recorded in the tracker.
+[Initializer and virtual-method contracts](common-effect-contracts/README.md)
+record the remaining call, field, table and control-flow evidence without
+source credit. Global source coverage remains unknown.

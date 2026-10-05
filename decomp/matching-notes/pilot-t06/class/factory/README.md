@@ -55,3 +55,10 @@ runtime; total human effort was not independently timed. Constructor, clone,
 initializer and virtual object-configuration source remain fallback. Native
 virtual-class ownership, base member types, callback C++ interfaces and T07
 runtime checks remain unresolved. T06 is not complete.
+
+Independent root reproduction at producer `4457e49` passes all 19 stages
+and exact whole-ROM comparison. The [root report](root-canonical-report.json)
+records five actual source inputs and 160 credited bytes; the
+[root test log](root-tests.log) records 208 passing tests without skips.
+Independent review also reruns both rejected five-unit compiler trials against
+the actual original reference, with zero source overrides published.
