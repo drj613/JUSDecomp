@@ -102,7 +102,7 @@ for i,row in enumerate(rows):
  for name,b in [('linked.elf',b'PUBLIC ELF CONTAINER'+bytes([i])),('arm7.bin',payload),('startup.o',b'PUBLIC OBJECT'),('startup.s',b'PUBLIC ASM INPUT'),('physical.ld',b'PUBLIC SCRIPT'),('physical.map',b'PUBLIC MAP')]:
   (d/name).write_bytes(b);artifacts.append({'name':name,'bytes':len(b),'sha256':sha(b)})
  p={k:row[k] for k in ('identity','entry','image_offset','image_bytes','image_sha256','header_sha256','params_offset','params_sha256','table_extent','table_sha256','regions')}
- p.update(status='opaque_physical_baseline_verified',source_bytes=0,functions='unknown',executability='unknown',original_relocations='unknown',arm7_source_complete=False,t10_complete=False,bootable_elf=False,generated_cpu_arch='ARMv4T',generated_elf_abi_flags=0x05000000,commands=[{'tool_sha256':tools['clang']['sha256'],'arguments':['--target=arm-none-eabi','-mcpu=arm7tdmi','-c','startup.s','-o','startup.o'],'return_code':0},{'tool_sha256':tools['lld']['sha256'],'arguments':['-T','physical.ld','-Map','physical.map','-o','linked.elf','startup.o'],'return_code':0}],selected_inputs=[a for a in artifacts if a['name'] in ('startup.o','physical.ld')],segments=[{'section':'.arm7.startup','vma':row['base'],'lma':row['base'],'file_bytes':row['image_bytes'],'memory_bytes':row['image_bytes'],'file_offset':128,'alignment':4,'flags':4},{'section':'.arm7.table','vma':row['base']+row['image_bytes'],'lma':row['base']+row['image_bytes'],'file_bytes':0,'memory_bytes':0,'file_offset':200,'alignment':4,'flags':4}],artifacts=artifacts,clang_sha256=tools['clang']['sha256'],lld_sha256=tools['lld']['sha256'],layout_sidecar_sha256=layout_sha,native_pins_sidecar_sha256=pins_sha)
+ p.update(status='opaque_physical_baseline_verified',source_bytes=0,functions='unknown',executability='unknown',original_relocations='unknown',arm7_source_complete=False,t10_complete=False,bootable_elf=False,generated_cpu_arch='ARMv4T',generated_elf_abi_flags=0x05000200,commands=[{'tool_sha256':tools['clang']['sha256'],'arguments':['--target=arm-none-eabi','-mcpu=arm7tdmi','-c','startup.s','-o','startup.o'],'return_code':0},{'tool_sha256':tools['lld']['sha256'],'arguments':['-T','physical.ld','-Map','physical.map','-o','linked.elf','startup.o'],'return_code':0}],selected_inputs=[a for a in artifacts if a['name'] in ('startup.o','physical.ld')],segments=[{'section':'.arm7.startup','vma':row['base'],'lma':row['base'],'file_bytes':row['image_bytes'],'memory_bytes':row['image_bytes'],'file_offset':128,'alignment':4,'flags':4},{'section':'.arm7.table','vma':row['base']+row['image_bytes'],'lma':row['base']+row['image_bytes'],'file_bytes':0,'memory_bytes':0,'file_offset':200,'alignment':4,'flags':4}],artifacts=artifacts,clang_sha256=tools['clang']['sha256'],lld_sha256=tools['lld']['sha256'],layout_sidecar_sha256=layout_sha,native_pins_sidecar_sha256=pins_sha)
  programs.append(p)
 report=dict(status='opaque_physical_baselines_verified',programs=programs,parent_rom_sha256=sha(data),layout_sidecar_sha256=layout_sha,native_pins_sidecar_sha256=pins_sha,producer_binary_sha256=sha(Path(__file__).read_bytes()),inputs_unchanged=True,source_bytes=0,t10_complete=False)
 '''
@@ -264,6 +264,15 @@ report=dict(status='opaque_physical_baselines_verified',programs=programs,parent
             changed[offset] ^= 1
             with self.subTest(offset=offset), self.assertRaises(ValueError):
                 tool().recheck_baselines(record, self.build_dir, bytes(changed), 'PUBLIC-BUILD', self.started)
+
+    def test_actual_generated_softfloat_container_flags_preserve_unknown_original_abi(self):
+        self.set_producer("\nfor p in report['programs']: p['generated_elf_abi_flags']=0x05000200")
+        try:
+            record = self.build()
+        except ValueError as error:
+            self.fail(f'actual generated EABI5 soft-float metadata rejected: {error}')
+        self.assertEqual(record['receipt']['programs'][0]['generated_elf_abi_flags'], 0x05000200)
+        self.assertEqual(record['receipt']['programs'][0]['original_relocations'], 'unknown')
 
     def test_optional_stage_variant_requires_pair_before_freshness(self):
         import verify

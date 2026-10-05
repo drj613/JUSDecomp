@@ -118,7 +118,7 @@ def _receipt(record, original, layouts, native, build_dir):
         semantics = {'status': 'opaque_physical_baseline_verified', 'source_bytes': 0,
             'functions': 'unknown', 'executability': 'unknown', 'original_relocations': 'unknown',
             'arm7_source_complete': False, 't10_complete': False, 'bootable_elf': False,
-            'generated_cpu_arch': 'ARMv4T', 'generated_elf_abi_flags': 0x05000000,
+            'generated_cpu_arch': 'ARMv4T', 'generated_elf_abi_flags': 0x05000200,
             'layout_sidecar_sha256': record['layout_sha256'],
             'native_pins_sidecar_sha256': record['native_pins_sha256']}
         if any(program.get(key) != value for key, value in semantics.items()):
