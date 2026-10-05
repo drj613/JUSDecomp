@@ -10,7 +10,7 @@ Exactly two contexts ran: `-O2` and `-O2,p`. Both raw object hashes are `d730f56
 
 The native constructor call loads label `data_0209e26c` into `r2` before key `data_0209e280` into `r1`. Their pool identities also occur in that original order. The previous direct-call/member-bridge forms reversed both. This is a concrete source-shape finding; it does not establish the original source-language constructor identity.
 
-Despite the existing outer non-null branch, placement construction adds another compare at TU `+0x1c0` and another conditional branch at `+0x1cc`, skipping the constructor when its storage is zero. The constructor call moves from original offset `456` / `0x1c8` to compiled offset `464` / `0x1d0`. The later pool moves by eight bytes. Post-call temporary roles also change: the candidate holds the intermediate vptr in `r1` and zero fields in `r0`; the original uses the opposite roles. Thus the candidate is not merely the original instruction sequence plus two added checks.
+Despite the existing outer non-null branch, placement construction adds another compare at TU `+0x1c0` and another conditional branch at `+0x1cc`, skipping the constructor when its storage is zero. The constructor call moves from original offset `456` / `0x1c8` to compiled offset `464` / `0x1d0`. The later pool moves by eight bytes. The post-call stores use the same register roles as the original: `r1` holds the intermediate vptr and `r0` holds zero. The original sequence at `+0x1cc..+0x1e4` is byte-identical to the candidate sequence at `+0x1d4..+0x1ec`. The diagnostic still fails its complete extent and masked comparison.
 
 | Compared call record | Offset | Relocation type | Addend | Actual symbol |
 | --- | --- | --- | --- | --- |
