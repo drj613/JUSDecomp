@@ -46,3 +46,18 @@ The candidate totals 224 verified source bytes: 192 instruction bytes and 32
 literal bytes across six functions. ARM7, embedded executables and preserved
 assets receive no source credit. The clone, initializer, configuration method,
 native class model and runtime behavior remain outside this result.
+
+## Reviewed cleanup and root reproduction
+
+The worker report above records the original candidate. Producer `1a89d19`
+removes its test-only `T06_UNKNOWN_BASE_BYTES` macro and uses literal physical
+span `0x7c`. The rejection test mutates a temporary source copy to span `0x7a`
+while retaining the production layout assertions. The [red test](layout-cleanup-red.log)
+and [green test](layout-cleanup-green.log) demonstrate the mutation check.
+
+The [fresh root report](root-canonical-report.json) passes all 19 stages and
+exact whole-ROM comparison at the new source hash. The raw constructor object
+hash remains unchanged. [Root negative trials](root-negative-trials.json)
+reject the literal offset mutation, changed base callee, and default optimizer
+context against the full six-unit manifest, each publishing zero overrides.
+The original prototype's macro-based trial record remains historical.

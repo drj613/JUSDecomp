@@ -74,7 +74,7 @@ Five published class targets remain exact fallback. The [entry's ABI limits](cla
 preserve the observed call and return interface without asserting ownership.
 T06 remains open and the global source percentage remains unknown.
 
-## Current verified source coverage
+## Factory promotion checkpoint
 
 Producer `4457e49` adds the 56-byte factory `func_0206c57c`. Its
 [fresh root report](class/factory/root-canonical-report.json) passes all 19
@@ -90,3 +90,20 @@ to zero before its base-constructor call, as recorded in the tracker.
 [Initializer and virtual-method contracts](common-effect-contracts/README.md)
 record the remaining call, field, table and control-flow evidence without
 source credit. Global source coverage remains unknown.
+
+## Current verified source coverage
+
+Producer `1a89d19` adds the 64-byte constructor `func_0206ca4c` with literal
+physical layout assertions and no production test knob. Its
+[fresh root report](class/constructor/root-canonical-report.json) passes all
+19 stages and exact whole-ROM comparison with six selected source units.
+Coverage is 224 bytes: 192 game and 32 SDK, comprising 192 instruction bytes
+and 32 literal bytes. The full suite, including initializer-candidate negatives,
+passes 214 tests without skips.
+
+Three published class targets remain fallback: clone, initializer and virtual
+object-configuration method. The [bounded initializer attempt](initializer/README.md)
+compiled 56 trials with zero exact passes. Its closest result has three masked
+byte differences and two swapped ABS32 pool identities; its source remains
+unregistered and earns no credit. T06 remains open, as do class ownership and
+runtime verification. Global source coverage remains unknown.
