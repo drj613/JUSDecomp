@@ -51,10 +51,11 @@
       "extent_bytes": 1016,
       "instruction_bytes": 1004,
       "literal_pool_bytes": 12,
-      "role_hypothesis": "virtual callback installer",
+      "role_hypothesis": "virtual configuration of a looked-up object through indirect calls",
       "category_if_verified": "game",
       "payload_sha256": "c819f1db4782c70cf9b168e735dd7b795ccd02b83ed5c208051e6ab72aeeca13",
-      "compiler_context": "unresolved; select and pin per function from experiments"
+      "compiler_context": "unresolved; select and pin per function from experiments",
+      "role_correction": "Original callback-installer hypothesis is refuted by complete original-code review; one explicit callback literal func_0206ceac is passed under flag 0x10."
     },
     {
       "symbol": "func_0206cfa4",

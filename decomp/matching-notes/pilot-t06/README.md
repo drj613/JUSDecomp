@@ -6,7 +6,7 @@ credit; only the promotions verified below are registered.
 
 The CommonEffect candidate includes initialization, factory, constructor and all
 four actual virtual overrides. The full 76-entry table corrects the earlier
-44-entry research sample, which missed the callback installer at slot `0x124`.
+44-entry research sample, which missed the virtual configuration method at slot `0x124`.
 Allocation is 132 bytes and the observed halfword is at offset 128. Base ownership,
 other field types and callback dependencies remain unresolved. These facts do
 not establish a complete C++ class layout or justify naming unknown fields.
@@ -55,3 +55,10 @@ inline ABI member over the observed opaque layout. It does not establish a
 complete native virtual class or recover base ownership. Six published class
 targets remain exact fallback. T06 remains open. The original runtime/class
 candidate reports describe their historical unpromoted state.
+
+Original-code review corrects the earlier callback-installer hypothesis for
+`func_0206ca8c`. It configures a looked-up object through indirect calls; its
+one explicit callback literal is `func_0206ceac`, passed to `func_02028384`
+under flag `0x10`. Several saved registers are only initialized on nonzero
+lookup but used after falling-through failure paths. The caller invariant is
+not yet established; candidate source must preserve the observed behavior.
