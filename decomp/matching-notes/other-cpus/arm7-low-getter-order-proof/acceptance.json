@@ -24,9 +24,6 @@
   "full_image_native_link_reconstruction": "not attempted",
   "artifact_sha256": {
     "decomp/matching-notes/other-cpus/arm7-low-getter-order-proof/.gitattributes": "6998e23cef5b6458e16d6edd2ac74070ac623a2590def3ca2176c55e2ef56364",
-    "decomp/matching-notes/other-cpus/arm7-low-getter-order-proof/__pycache__/test_replay.cpython-314.pyc": "f9a79ef97a69cccc044d2f89570fd28394fc91cb777dc08d8385553b5c74f15c",
-    "decomp/matching-notes/other-cpus/arm7-low-getter-order-proof/__pycache__/test_verify.cpython-314.pyc": "13d05ef1f900b0b56fd21a75138c39ed6ee9275ffba09eb0f58945a87146e969",
-    "decomp/matching-notes/other-cpus/arm7-low-getter-order-proof/__pycache__/verify.cpython-314.pyc": "8a078c500a1e326c8845fd04d0943fa38ace94309af6ac99e7eddbfeb29f6962",
     "decomp/matching-notes/other-cpus/arm7-low-getter-order-proof/accepted-recipe.json": "ef7e7b503d3510a102c8b6df446b0e006c265503031e6c03b8bb351db7f537ba",
     "decomp/matching-notes/other-cpus/arm7-low-getter-order-proof/accepted_previous_source.c": "fe3711c03cb2f0e0ee50a0751604766984e4a285a369290f6f159b87019bd537",
     "decomp/matching-notes/other-cpus/arm7-low-getter-order-proof/compiled-llvm.txt": "865e24260f627994b0de05fef50cdfc2010e4f193a29b4c0485275d0b7732378",

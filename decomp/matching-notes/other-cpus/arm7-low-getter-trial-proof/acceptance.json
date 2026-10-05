@@ -28,9 +28,6 @@
   "full_image_native_link_reconstruction": "not attempted",
   "artifact_sha256": {
     "decomp/matching-notes/other-cpus/arm7-low-getter-trial-proof/.gitattributes": "6998e23cef5b6458e16d6edd2ac74070ac623a2590def3ca2176c55e2ef56364",
-    "decomp/matching-notes/other-cpus/arm7-low-getter-trial-proof/__pycache__/test_reproduce.cpython-314.pyc": "baaf6101670c6dd769b072deff52d95c1dd63f4e0e542821edf47f6878d27835",
-    "decomp/matching-notes/other-cpus/arm7-low-getter-trial-proof/__pycache__/test_verify.cpython-314.pyc": "500e6e2b8fae734e9bbf3c1d52d163527b7239a6586298183534ace0281e99d8",
-    "decomp/matching-notes/other-cpus/arm7-low-getter-trial-proof/__pycache__/verify.cpython-314.pyc": "9ae7ffb71c5e26d0c35569b5f15edc32cdeda244293ecd855ba28070b89f2290",
     "decomp/matching-notes/other-cpus/arm7-low-getter-trial-proof/compiled-llvm.txt": "865e24260f627994b0de05fef50cdfc2010e4f193a29b4c0485275d0b7732378",
     "decomp/matching-notes/other-cpus/arm7-low-getter-trial-proof/compiler-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "decomp/matching-notes/other-cpus/arm7-low-getter-trial-proof/compiler-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
