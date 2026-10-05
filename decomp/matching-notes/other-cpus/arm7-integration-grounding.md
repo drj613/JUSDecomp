@@ -92,17 +92,18 @@ a false unchanged-stage-count claim.
 The stage must bind actual invocation/stdout/stderr/exit, parent ROM, consumed
 sidecar bytes, reviewed producer executable/source-lock provenance and actual
 clang/lld pins to the current build. Add those files to input snapshots and
-the native ARM7 subtree to artifact hashes. At repack, recheck that evidence
-against live artifacts and reconstruct from each actual ELF again, matching
-the recorded `arm7.bin`. The foreign Rust receipt is evidence to verify, not
-a mutable claim that bypasses canonical freshness.
+the native ARM7 subtree to artifact hashes. Capture the receipt directly from
+that successful fresh invocation, rather than loading a detached report. At
+repack, recheck every actual artifact against that receipt and current build.
+The accepted producer already establishes ELF/layout/image validation; the
+consumer preserves that proof by verifying its exact artifact digests.
 
 Pass two validated payload receipts to the existing packer as an optional
 argument. Each receipt needs complete program identity/CPU/selector; parent,
 program and header hashes; stored-image offset/size/hash; original entry;
 parameter/table/region/VMA/LMA/BSS metadata; contained ELF/image/report and
 actual link-input artifact paths/hashes; reviewed producer/tool/input pins;
-current canonical build ID/start; and a successful live ELF revalidation.
+current canonical build ID/start; and evidence of the fresh pinned invocation.
 No arbitrary address/path-to-bytes map is accepted.
 
 For parent, derive the write interval from the original header and checked
@@ -113,6 +114,9 @@ and nonoverlap with ARM9 writes and metadata. A temporary child copy with only
 that ARM7 replacement must retain the original whole-child hash before being
 placed back into its unchanged FAT extent. The parent ARM7 and child ARM7 each
 consume their own reconstructed artifacts despite equal payload hashes.
+Hash the exact reconstructed byte buffer that will be spliced and compare it
+to the fresh receipt before use; hashing a path then rereading unchecked bytes
+would leave a consumption race.
 
 Keep existing whole-ROM equality checks unchanged. Add two write records with
 complete program identities, native artifact paths/hashes and actual offsets;
@@ -127,7 +131,7 @@ percent `None` and unresolved ARM7/embedded source scope at 408. Keep 304 matche
 ARM9 source bytes and report ARM7 native binary preservation separately, with
 functions/executability/original-relocations unknown and zero source credit.
 
-## Needed native interface and blockers
+## Existing native interface and acceptance conditions
 
 The tentative writer was inspected in
 `/private/tmp/jus-arm7-physical-baseline-dsd` during this pass; it is not accepted
@@ -139,15 +143,28 @@ building, and reports their digests (20–61). It does not independently supply
 the canonical build ID/timestamps or require exactly the canonical two-program
 set; canonical integration must supply those constraints.
 
-The crucial missing consumer seam is live revalidation. Its
-`arm7_physical_baseline.rs::validate_linked` is private. Expose a bounded checked
-operation that takes the current checked view, approved pins, artifact directory
-and recorded receipt, validates current ELF/layout/input provenance, derives
-the image from ELF, and compares the live reconstructed file. Alternatively,
-an accepted minimal verifier shell can perform that same contract. Do not
-duplicate an unchecked ELF reader merely to trust `arm7.bin` by original hash.
-Acceptance of baseline/producer/source closure and this revalidation contract
-are prerequisites to implementation, not claims established by this document.
+No new public Rust revalidation API is required under this contract. The pinned
+builder runs freshly, owns the controlled empty output, validates ELF/layout,
+reconstructs its image, and emits the directly captured receipt. Canonical
+checks bind its actual executable/cwd/argv/exit, exact program set, current
+build, contained paths and every artifact digest. A second ELF validator would
+duplicate a proof already made by that accepted execution. Detached report or
+prebuilt-output acceptance is explicitly outside this contract.
+
+The producer must bind the digest of the exact ELF byte buffer read for
+validation and reconstruction, then require the file to retain that digest
+through receipt publication. Hashing the ELF only later is insufficient:
+validate E0, replace it with E1, then hash E1 can pair image(E0) with an invalid
+ELF(E1) in an apparently self-consistent receipt. The writer is fixing that
+real race with TDD; this document does not claim the fix has passed. Repair the
+producer snapshot rather than adding a modeled consumer validator. Bind input
+snapshots and image/output digests with the same authority discipline.
+
+Acceptance of the physical baseline, producer/source closure and those exact
+snapshot guarantees remain prerequisites. Under them, digest checks preserve
+the established proof; no counterexample requiring a second public validator
+was identified. A caller that cannot ensure fresh pinned execution must not
+use this optional integration mode.
 
 ## Proposed public negative tests
 
@@ -161,6 +178,10 @@ are prerequisites to implementation, not claims established by this document.
   output; skipped/failed builder or a copied success report cannot pass.
 - Mutate producer/source lock, native tool, sidecar, staged link input or output
   during build/repack; rechecks must fail before successful publication.
+- Replace the ELF after its validated read but before later artifact hashing:
+  the producer's validated-buffer digest must reject publication. Replace an
+  image between a path hash and its consumed read: the packer's exact-buffer
+  check must reject. These test the snapshot boundaries, not duplicate parsing.
 - Assert both native payload paths appear in writes, ELF-derived bytes reach
   their exact original intervals, and ARM9 17-module/87,493-slot/304-byte source
   results remain unchanged. Optional-stage checks reject extra or skipped
