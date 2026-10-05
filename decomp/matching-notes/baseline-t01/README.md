@@ -1,15 +1,19 @@
 # T01 pinned baseline results
 
-T01 remains blocked. Native `dsd 0.12.0` extraction, delinking, linker-script
-generation, and objdiff generation succeeded. Linking did not run because the
-private Metrowerks linker is unavailable. The module check returned 1 and failed
-all 17 declared targets. No source coverage or full-ROM reconstruction is claimed.
+The owner-authorized native baseline passes all 17 ARM9 module checks, symbol
+checks, and direct original-ROM byte, load-address, and BSS comparisons.
+The [native result](native-results.json) records the successful LLVM replacement
+for the unavailable private Metrowerks linker. No reconstructed source coverage
+or full-ROM reconstruction is claimed.
+
+The first run below stopped before linking because Metrowerks was unavailable.
+Its module check returned 1. Those failed-run logs remain as historical evidence.
 
 The source pin is `6a061e3897f10a8800bf7ec9afde82fa8c9dbe1b`. The owned remote is
 <https://github.com/drj613/JUSDecomp>, whose parent is `piuzera/JUSDecomp`.
 Work is on `track-a/matching`. Upstream remains a separate read-only remote.
 
-## Inputs and results
+## Inputs and original-run results
 
 The owner-supplied ROM is AJUJ revision 0, 67,108,864 bytes, with SHA-1
 `ba58e20ee60eb81c33dcd4934a21271baa9f954a`. This matches upstream's required
@@ -37,10 +41,11 @@ There are 15 reference objects for 17 modules. Overlays 9 and 13 are separate
 linker script; absence of a gap object does not remove either check target.
 Reference objects and linked objects count as zero reconstructed source.
 
-## Executable scope still unbuilt
+## Executable scope
 
 The ARM9 project declares main, ITCM, DTCM, and overlays 0 through 13.
-None has passed a linked check in this run.
+All 17 pass the native linked checks. The initial Metrowerks run above had no
+linked output.
 
 ARM7 occupies 165,552 bytes and has no overlays. Its internal section boundaries
 remain unknown. `ChildRom/JSS2Child.srl`, NitroFS file 79, is an embedded
@@ -52,7 +57,7 @@ The NitroFS scan checked direct NDS executable files. Proprietary containers hav
 not been recursively classified for further executable payloads. Full source
 completion requires resolving that inventory gap.
 
-## Missing inputs and native alternative
+## Native replacement
 
 The exact original-baseline input missing is the owner-supplied `mwldarm.exe`,
 preferably `1.2/sp2p3`, with its version and SHA-256. A tested Windows executable
@@ -60,8 +65,18 @@ runner is also required. No `mwccarm` compiler is needed for this binary baselin
 Local searches found no linker or compiler archive. The owner confirmed that
 the private linker is unavailable.
 
-The owner authorized a Unix or macOS alternative. Bead `jus-bjry.12` tracks the
-native ARM linker experiment. It must pass the same 17 byte comparisons and
-record its changed toolchain explicitly. It does not reproduce the unavailable
-Metrowerks binary. T02 and source promotion remain gated pending verified results.
+The owner authorized a Unix or macOS alternative and autonomous continuation.
+Bead `jus-bjry.12` records the LLVM experiment. The integrator ran the adapter at
+`b0a0243`, all 11 public tests, `dsd check modules -f`, and `dsd check symbols -f`.
+Both dsd checks exited 0. All 2,141,728 initialized bytes, load addresses, and BSS
+extents also matched direct slices of the pinned original ROM.
 
+The changed linker is pinned in [toolchain.lock.json](../../toolchain.lock.json).
+The unavailable Metrowerks binary has not been reproduced. The native ELF keeps
+standard Thumb symbol mode bits. A separate `dsd-check.elf` changes section names
+and function-address parity for dsd's old checker; it preserves linked payloads.
+The initial raw-native symbol check failure is retained in
+[native-symbol-result.json](native-symbol-result.json).
+
+[native.md](native.md) describes the adapter and its checker view.
+[native-reproduce.md](native-reproduce.md) gives the verified commands.

@@ -40,5 +40,24 @@
     "candidate": "Linux x86_64 with wibo or Wine, or native Windows",
     "available_worker": "Docker/Colima Linux aarch64; x86_64/i386 QEMU binfmt enabled"
   },
-  "baseline_status": "blocked"
+  "baseline_status": "native_modules_symbols_and_original_rom_comparison_passed",
+  "native_linker": {
+    "version": "23.1.2",
+    "tool": "LLVM lld",
+    "sha256": "3c9298dbaf1389f490e72bc055e9595cfe5f125e078deff9bedb4c54ceb15a54",
+    "distribution": "Homebrew core lld 23.1.2 macOS arm64",
+    "recipe": "HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install lld"
+  },
+  "native_attributes_compiler": {
+    "tool": "LLVM clang",
+    "version": "23.1.2",
+    "sha256": "d64d1ee59d8aff01397eb88adea263e490ac65766faefc8b5323b4a06d0438e5",
+    "flags": [
+      "--target=arm-none-eabi",
+      "-march=armv5te",
+      "-c"
+    ],
+    "purpose": "Generate .ARM.attributes shim only; zero reconstructed game source"
+  },
+  "original_metrowerks_baseline_status": "blocked_missing_private_input"
 }
