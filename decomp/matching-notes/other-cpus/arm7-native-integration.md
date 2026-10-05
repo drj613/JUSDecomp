@@ -1,4 +1,4 @@
-# Optional native ARM7 payload integration candidate
+# Optional native ARM7 payload integration
 
 The option requires a freshly executed, independently approved physical ARM7
 producer. It accepts no prebuilt payload directory or detached success report.
@@ -8,7 +8,7 @@ pending and rejects. The independently reviewed producer now has an
 snapshot fix and reviewed source/native-tool pins. That approval covers the
 producer; canonical integration acceptance remains separate.
 
-The existing verifier arguments remain. To enable the candidate add:
+The existing verifier arguments remain. To enable native ARM7 integration add:
 
 ```sh
 --arm7-native-manifest "$APPROVED_REPO_LOCAL_MANIFEST" \
@@ -52,7 +52,13 @@ equal images. No BSS bytes are inserted. Existing original-header, whole-child
 and whole-ROM equality checks remain required.
 
 Public invented-ROM tests execute a real fixture producer to prove orchestration
-and failure handling, not native ELF correctness. The candidate does not grant
+and failure handling, not native ELF correctness. The integration grants no
 source bytes or functions. ARM9 17-module/87,493-relocation/304-byte source
-contracts and global unknown scope remain separate. Actual optional full-ROM
-acceptance awaits independent root integration review and proof.
+contracts and global unknown scope remain separate. Independent root proof at `cef286f` passes all 20 stages and all 248 tests
+with zero skips. Both native ARM7 artifacts are consumed beside the 17 ARM9
+payloads, yielding 19 writes and 243 actual artifact hashes. The ROM remains
+exactly 67,108,864 bytes with the original hash. Source stays seven functions
+and 304 ARM9 bytes; global source coverage remains unknown. Independent
+gpt-6.1-sol review of `e38bf84` reports No flags. See the
+[proof](arm7-native-integration-proof/root-proof.json) and
+[review](arm7-native-integration-proof/accepted-review.json). T10 remains open.

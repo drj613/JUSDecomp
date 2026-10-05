@@ -1,5 +1,5 @@
 {
-  "status": "root_verified_pending_final_review",
+  "status": "root_verified_and_reviewed",
   "candidate_code_commit": "80209c7",
   "root_producer_commit": "cef286fcdf12a56669bae4a0fe56c30ab1245113",
   "worker_producer_commit": "80209c7f90fab21238639ebadf17e05dde98ca73",
@@ -54,5 +54,11 @@
     "root-source-comparison.json": "5f07b5c1f66a534a11615bc41855a71a9ef9031bcb8f12f1e36d1c175a8df784",
     "root-standalone-rejection.json": "5a8b91f8b871f3bc12ef425f7ee2c28c1f9f4d87537ca5ede6eb173bc5a5b77f",
     "root-tests.log": "3886735d49442c89a885d508504948ecc847e39242194718d01af99714d2eadc"
+  },
+  "review": {
+    "reviewed_JUS_commit": "e38bf84",
+    "model": "gpt-6.1-sol",
+    "result": "No flags",
+    "scope": "canonical paired native ARM7 integration, actual proof and decision trail"
   }
 }
