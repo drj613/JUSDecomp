@@ -12,7 +12,7 @@
   "canonical_changes": false,
   "T10_complete": false,
   "evidence_sha256": {
-    ".gitattributes": "ac8ff4eb8b21db2cc16211758f6482060f8f6c512e2b5072ae087ad066805155",
+    ".gitattributes": "a4a010e58e4abbb6f22c64966c2584ff9a159ef2c81ca901260bad4e3f4dd495",
     "independent/check_link.py": "12fca237f1409480238774417a803bed69ea9ae6a5b850937f829c36e00e3601",
     "independent/fresh-result.json": "90b76c7294a57938c24d15667ca46edfdb5d1f8ee8d77e9f6138cb357aed450e",
     "independent/independent-receipt.json": "1f916570dc8f761992bff71d6bbf974d9a9049a7850abdb52a31d093fc909709",
