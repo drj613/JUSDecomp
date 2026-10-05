@@ -4,8 +4,8 @@ Architect:
 - [x] Ground (two explorers traced parser and module callers; factual synthesis pending)
 - [x] Sketch (complete: shared-policy versus separate bounded analyzer)
 - [x] Agree (bounded observer selected; no human checkpoint requested)
-- [ ] Implement (active: test-first bounded chosen contract)
-- [ ] Scrap (only if concrete repeated implementation friction warrants redesign)
+- [x] Implement (55 Rust tests and actual probe independently reproduced)
+- [x] Scrap evaluated (both arithmetic defects fit existing owner; no redesign)
 
 Arena:
 - [x] Frame
@@ -13,7 +13,7 @@ Arena:
 - [x] Cross-judge (gpt-6-sol; B15/A12)
 - [x] Pick (B)
 - [x] Graft (immutable reporting and hard-span invariants)
-- [ ] Verify
+- [x] Verify (root native hashes, real spans and 19-stage compatibility)
 
 Scope: explicit per-function/module ISA and branch policy for checked ARM7 inputs,
 without guessed function bounds, original symbols, relocations, source or baseline credit.
