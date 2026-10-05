@@ -64,7 +64,7 @@ The authoritative [root proof](root-proof.json),
 [full compatibility report](root-arm9-compatibility.json),
 [metadata comparison](root-metadata.json) and
 [source hash comparison](root-source-hashes.json) include actual commands,
-inputs and result hashes. Final independent acceptance review follows this
-checkpoint. This repair earns no ARM7 source, function, executability or
+inputs and result hashes. Independent gpt-6.1-sol review of checkpoint `a86f78b` reports
+[No flags](review.json). This repair earns no ARM7 source, function, executability or
 original-relocation credit. T10 remains open, and the native physical baseline
 is a separate scope.
