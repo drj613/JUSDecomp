@@ -90,5 +90,14 @@
       "bytes": 32
     }
   ],
-  "startup_ram_copy_dependency_status": "Sources are outside the stored ARM7 image; contents and executable status unresolved; not included in recovered autoload or source coverage."
+  "startup_ram_copy_dependency_status": "Sources are outside the stored ARM7 image; contents and executable status unresolved; not included in recovered autoload or source coverage.",
+  "related_arm9_startup_buffer_use": {
+    "function": "func_02061e70",
+    "source_address": "0x027ffe00",
+    "destination_address": "0x027ffa80",
+    "bytes": 352,
+    "condition": "halfword at 0x027ffc40 is not 2",
+    "copy_function": "func_02051890",
+    "status": "Byte-copy direction and extent verified from original ARM9 code; ARM7 source contents and executable status remain unresolved."
+  }
 }
