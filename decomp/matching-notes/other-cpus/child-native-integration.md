@@ -5,8 +5,9 @@ embedded ARM9, validates all 35,092 original relocation slots, and recompresses
 its payload into the exact original layout. It runs alongside the independent
 paired ARM7 stage. The source-enabled pipeline has 21 stages and 20 disjoint
 writes. Root and worker reproduce the exact 67,108,864-byte parent ROM and the
-2,141,384-byte child. Independent source review of `320ea2a` reports No flags;
-the exported root proof is awaiting its final review.
+2,141,384-byte child. Independent gpt-6.1-sol review reports No flags for source `320ea2a` and
+exported proof/trail `8b7cc6a`. Acceptance is recorded in
+[accepted-review.json](child-native-integration-proof/accepted-review.json).
 
 The new `child_native_baseline.py` owns extraction, strict initialization,
 reference-object linking, three initialized images and BSS boundaries, original

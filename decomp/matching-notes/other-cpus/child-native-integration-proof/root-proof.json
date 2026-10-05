@@ -1,5 +1,5 @@
 {
-  "status": "root_verified_review_pending",
+  "status": "root_verified_and_reviewed",
   "candidate_code_commit": "320ea2ad796fdd179ce504021436ffbd9394c1f3",
   "root_producer_commit": "0c1e754d4a32e4b8d6ae8ff96d9fc51397bbd18b",
   "worker_producer_commit": "320ea2ad796fdd179ce504021436ffbd9394c1f3",
@@ -60,5 +60,12 @@
     "worker-proof.json": "0729e1adf5a3fc1cc9d10b912bcd0b35e557de80fc5fb54698ffdcffe435530c",
     "live-mutations.json": "27a48c83f5d0564246764d669b3273c8d1a6253a25a7e310b0228e991c23b0a1",
     "root-default-report.json": "eda03b50869c08d53a5bef1f1fa25c633778b72c7be7e5087ede42764920c896"
+  },
+  "review": {
+    "model": "gpt-6.1-sol",
+    "source_commit": "320ea2ad796fdd179ce504021436ffbd9394c1f3",
+    "proof_trail_commit": "8b7cc6aaf39df4c3258bb843c53c9db028797f2a",
+    "verdict": "No flags",
+    "scope": "child native canonical integration source, current exported proof and decision trail"
   }
 }

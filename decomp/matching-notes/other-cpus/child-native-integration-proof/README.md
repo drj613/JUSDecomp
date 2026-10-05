@@ -5,7 +5,9 @@ ARM7 and child ARM9 operations. The actual run is
 `/private/tmp/jus-child-native-worker-proof-5/report.json`. Its `source_commit`
 contains every executed candidate script. [worker-proof.json](worker-proof.json)
 records the report digest and normalizes only the repository, build, and ROM
-path prefixes. This is worker evidence pending independent review.
+path prefixes. Independent root verification and gpt-6.1-sol review of source `320ea2a`
+and proof/trail `8b7cc6a` report No flags. See [root-proof.json](root-proof.json)
+and [accepted-review.json](accepted-review.json) for accepted evidence.
 
 The run produces 20 disjoint physical writes: 17 parent ARM9 modules, one child
 compressed ARM9 slice, and two independently produced ARM7 images. The child
