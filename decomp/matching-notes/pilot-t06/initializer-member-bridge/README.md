@@ -33,3 +33,12 @@ python3 decomp/matching-notes/pilot-t06/initializer-member-bridge/reproduce.py \
 ```
 
 The reference directory must contain `src/main/common_effect_init.o` with the saved hash. [contexts.json](contexts.json) pins the candidate and all three contexts. [verification.json](verification.json) records zero acceptance and the test result. Original and compiled objects stay private under ignored `build/`; public evidence contains metadata and reconstructed source only.
+
+## Independent verification
+
+The reviewer reran all three saved contexts with the pinned real tools and
+reproduced the identical prior near-miss object and strict rejection. All
+three new actual-tool tests run; the complete root suite passes 225 tests
+without skips. [Root verification](root-verification.json) and
+[root tests](root-tests.log) record the result. Canonical source stays at
+304 bytes; no initializer source or ROM claim is added.
