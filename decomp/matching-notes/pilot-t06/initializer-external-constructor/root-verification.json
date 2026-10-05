@@ -18,5 +18,13 @@
   },
   "canonical_manifest_and_source_unchanged_from": "4d84b69",
   "no_initializer_full_rom_attempt": true,
-  "failed_root_setup": "Initial root invocation named a nonexistent class-binding initializer reference; corrected to original initializer-trial reference after reading saved provenance."
+  "failed_root_setup": "Initial root invocation named a nonexistent class-binding initializer reference; corrected to original initializer-trial reference after reading saved provenance.",
+  "post_call_store_comparison": {
+    "instruction_words_checked": 7,
+    "original_first_offset": 460,
+    "candidate_first_offset": 468,
+    "byte_identical": true,
+    "vptr_register": "r1",
+    "zero_register": "r0"
+  }
 }
