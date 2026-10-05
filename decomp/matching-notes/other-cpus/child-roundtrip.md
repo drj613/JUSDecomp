@@ -44,3 +44,9 @@ The pinned `dsd rom build` fails before producing a child ROM. Its extracted con
 The builder also reconstructs layout. `Rom::build` starts ARM9 at the next configured alignment after its header placeholder, whereas the child stores it at `0x4000`. It pads the result to a power of two, whereas the original child is trimmed to 2,141,384 bytes, including the 136-byte multiboot signature after the declared used ROM size. These source behaviors are independent of compression and are left unchanged. The bounded packer preserves the authoritative original layout instead.
 
 The public [metadata report](child-rom-roundtrip.json) records hashes, source revisions, codec footer fields, preserved scope and the remaining limitations. No ROM, extracted executable or tool binary is committed.
+
+Root independently rebuilt the codec with the same source, Cargo.lock and
+artifact hash. `child-codec-root-build.json` and the codec test log record that
+run. `child-rom-root-roundtrip.json` records a fresh whole-child comparison
+using the independently linked root native images. All 11 public packer tests
+pass in `child-rom-root-tests.log`. This remains zero-credit binary verification.

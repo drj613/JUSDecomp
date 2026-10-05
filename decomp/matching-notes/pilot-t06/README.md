@@ -1,8 +1,8 @@
 # Bounded T06 pilot targets
 
 `targets.json` publishes eight original identities before source implementation.
-Each extent includes its literal pool. This is a candidate list and earns no
-source credit. Compiler contexts remain unresolved.
+Each extent includes its literal pool. Publishing a candidate grants no source
+credit; only the promotions verified below are registered.
 
 The CommonEffect candidate includes initialization, factory, constructor and all
 four actual virtual overrides. The full 76-entry table corrects the earlier
@@ -34,3 +34,24 @@ with repeated allocated section names are currently rejected; a TU strategy or
 an independently tested gate extension is required before those objects can pass.
 T06 closes only after a complete bounded class/family and measured effort have
 been verified. Runtime smoke testing remains T07's serialized emulator work.
+
+## Verified partial promotion
+
+Producer commit `47aa4b8` registers the 32-byte `__FindExceptionTable` C runtime
+helper and 20-byte `func_0206d010` C++ destructor ABI bridge. Together with the
+existing 24-byte overlay trampoline, the [fresh canonical report](canonical-source-report.json)
+passes all 19 stages, all 17 initialized modules, all 87,493 relocation slots
+and the exact original whole-ROM hash. Coverage is 76 bytes: 44 game and 32 SDK,
+comprising 64 instruction bytes and 12 literal bytes. The global percentage
+remains unknown.
+
+The runtime candidate's earlier failed pipeline remains documented in
+`runtime/pipeline-proof.json`. Splitting the main reference object exposed a
+cross-object ARM/Thumb label-normalization bug; the [selected-input fix and proof](../cross-targets-t15/README.md)
+restore correct target modes without modifying instruction or data payloads.
+
+The destructor bridge preserves the original C entry identity and calls an
+inline ABI member over the observed opaque layout. It does not establish a
+complete native virtual class or recover base ownership. Six published class
+targets remain exact fallback. T06 remains open. The original runtime/class
+candidate reports describe their historical unpromoted state.

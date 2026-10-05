@@ -40,3 +40,17 @@ The root repeated extraction and CPU probes at producer `a2ffe1df8a3da44084978f6
 `fresh-scope.json`, `fresh-extraction-checks.json`, `fresh-cpu-probes.json`
 and `strict-child-init.log` record these runs. The independent review is
 in `../header-dependencies/review.json`. T10 remains open.
+
+`arm7-autoload-scope.json` recovers physical ARM7 placement from the actual
+startup loader. The 432-byte startup copies 66,120 and 98,976 initialized bytes
+to `0x037f8000` and `0x027e0000`, then clears 14,920 and 6,504 BSS bytes.
+The 24-byte table completes the original 165,552-byte stored image.
+Function modes and code/data boundaries remain unresolved; this inventory
+earns zero source or linked-baseline credit.
+
+The observed ARM7 entry seed is `0x037f8468` in autoload0, reached by an
+ARM-state startup branch. Autoload1 mappings and all code/data partitions remain
+unresolved. Startup also copies 352 bytes from `0x023fe940` to `0x027ffa80` and
+32 bytes from `0x023fe904` to `0x027ffbe0`. These sources lie outside the stored
+image; their contents and executable status are unresolved RAM dependencies.
+They grant no autoload or source credit.
