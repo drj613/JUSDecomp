@@ -1,5 +1,6 @@
 """Public synthetic checks for the bounded dsd 0.12 native linker experiment."""
 import importlib.util
+import hashlib
 import json
 import struct
 import shutil
@@ -135,6 +136,20 @@ SECTIONS {
             view_function = next(s for s in view.symbols() if view.symbol_name(s) == 'thumb_func')
             self.assertEqual(raw_function[1], 0x02000001)
             self.assertEqual(view_function[1], 0x02000000)
+            input_record = root / 'out/link-inputs.json'
+            self.assertTrue(input_record.is_file(), 'actual linker input record missing')
+            provenance = json.loads(input_record.read_text())
+            self.assertEqual(provenance['returncode'], 0)
+            self.assertEqual(provenance['command'][0], lld)
+            self.assertEqual(len(provenance['inputs']), 2)
+            for item in provenance['inputs']:
+                selected = Path(item['path'])
+                self.assertIn(item['path'], provenance['command'])
+                self.assertEqual(item['sha256'], hashlib.sha256(selected.read_bytes()).hexdigest())
+            reference = provenance['objects'][0]
+            self.assertEqual(reference['reference_sha256'], hashlib.sha256(fixture()).hexdigest())
+            self.assertEqual(Path(reference['source']), (objects / 'a.o').resolve())
+            self.assertEqual(reference['normalized'], provenance['inputs'][0]['path'])
 
     def test_dsd_check_view_changes_only_known_names_and_function_mode_bits(self):
         tool = module()

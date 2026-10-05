@@ -9,6 +9,7 @@ import bisect
 import hashlib
 import json
 import re
+import shutil
 import struct
 import subprocess
 from pathlib import Path
@@ -222,20 +223,46 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     objects = (args.output / 'objects').resolve()
     objects.mkdir(exist_ok=True)
+    reference_objects = []
     for source in sorted(args.objects.glob('*.o')):
-        (objects / source.name).write_bytes(normalize_object(source.read_bytes()))
+        original = source.read_bytes()
+        normalized = normalize_object(original)
+        destination = objects / source.name
+        destination.write_bytes(normalized)
+        reference_objects.append({'filename': source.name, 'source': str(source.resolve()),
+                                  'normalized': str(destination),
+                                  'reference_sha256': hashlib.sha256(original).hexdigest(),
+                                  'normalized_sha256': hashlib.sha256(normalized).hexdigest()})
     script, modules = translate_lcf(args.lcf.read_text(), objects.resolve())
     (args.output / 'native.ld').write_text(script)
     attributes = args.output / 'attributes.s'
     attributes.write_text('.arch armv5te\n')
-    attr_object = args.output / 'attributes.o'
-    subprocess.run([args.clang, '--target=arm-none-eabi', '-march=armv5te', '-c',
-                    str(attributes), '-o', str(attr_object)], check=True)
+    attr_object = (args.output / 'attributes.o').resolve()
+    compiler_command = [args.clang, '--target=arm-none-eabi', '-march=armv5te', '-c',
+                        str(attributes), '-o', str(attr_object)]
+    subprocess.run(compiler_command, check=True)
     linked = args.output / 'linked.elf'
+    selected = [*sorted(objects.glob('*.o')), attr_object]
     command = [args.lld, '-m', 'armelf', '--no-check-sections', '--entry=ARM9_TEXT_START', '-T',
                str(args.output / 'native.ld'), '-o', str(linked),
-               *map(str, sorted(objects.glob('*.o'))), str(attr_object)]
+               *map(str, selected)]
+    provenance = {
+        'schema_version': 1, 'command': command, 'returncode': None,
+        'objects': reference_objects,
+        'inputs': [{'path': str(path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+                   for path in selected],
+        'attributes': {'sha256': hashlib.sha256(attr_object.read_bytes()).hexdigest(),
+                       'compiler_command': compiler_command},
+        'lcf_sha256': hashlib.sha256(args.lcf.read_bytes()).hexdigest(),
+        'native_script_sha256': hashlib.sha256(script.encode()).hexdigest(),
+        'lld_sha256': hashlib.sha256(Path(shutil.which(args.lld) or args.lld).read_bytes()).hexdigest(),
+        'clang_sha256': hashlib.sha256(Path(shutil.which(args.clang) or args.clang).read_bytes()).hexdigest(),
+    }
+    provenance_path = args.output / 'link-inputs.json'
+    provenance_path.write_text(json.dumps(provenance, indent=2) + '\n')
     result = subprocess.run(command, capture_output=True, text=True)
+    provenance['returncode'] = result.returncode
+    provenance_path.write_text(json.dumps(provenance, indent=2) + '\n')
     (args.output / 'link.log').write_text(result.stdout + result.stderr)
     result.check_returncode()
     linked_data = linked.read_bytes()
