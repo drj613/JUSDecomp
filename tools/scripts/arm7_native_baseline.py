@@ -10,6 +10,26 @@ from pathlib import Path
 from other_executables import _nitrofs, _region
 
 
+class _LiveOperation:
+    __slots__ = ('__capture',)
+
+    def __init__(self, record):
+        object.__setattr__(self, '_LiveOperation__capture', json.dumps(record, sort_keys=True))
+
+    def __setattr__(self, name, value):
+        raise AttributeError('fresh ARM7 operation is immutable')
+
+    @property
+    def report(self):
+        return json.loads(self.__capture)
+
+    def recheck(self, record, build_dir, original, build_id, started_ns):
+        captured = self.report
+        if record != captured:
+            raise ValueError('ARM7 audit report differs from actual live operation')
+        return _recheck_baselines(captured, build_dir, original, build_id, started_ns)
+
+
 def _sha(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -243,11 +263,17 @@ def build_baselines(rom, output, approval_path, producer, root, build_id, starte
         'layout_sha256': _sha(layout_bytes), 'native_pins_sha256': _sha(native_bytes),
         'producer_sha256': _sha(producer_bytes), 'approval_path': str(approval_path),
         'approval': approval, 'tool_paths': tool_paths, 'root': str(root)}
-    recheck_baselines(record, output.parent, original, build_id, started_ns)
-    return record
+    _recheck_baselines(record, output.parent, original, build_id, started_ns)
+    return _LiveOperation(record)
 
 
-def recheck_baselines(record, build_dir, original, build_id, started_ns):
+def recheck_baselines(record, build_dir, original, build_id, started_ns, operation=None):
+    if operation is None:
+        raise ValueError('ARM7 needs live fresh producer operation; rerun canonical verifier')
+    return operation.recheck(record, build_dir, original, build_id, started_ns)
+
+
+def _recheck_baselines(record, build_dir, original, build_id, started_ns):
     if (record.get('status') != 'passed' or record['build_id'] != build_id or record['started_ns'] != started_ns
             or record['execution']['exit_status'] != 0):
         raise ValueError('ARM7 current build/execution provenance differs')
@@ -261,6 +287,8 @@ def recheck_baselines(record, build_dir, original, build_id, started_ns):
     execution = json.loads(_read(output/'execution.json', build_dir, started_ns))
     if receipt != record['receipt'] or execution != record['execution']:
         raise ValueError('ARM7 captured execution/receipt changed')
+    if json.loads(execution['stdout']) != receipt:
+        raise ValueError('ARM7 receipt differs from actual producer stdout')
     if json.loads(_read(record['approval_path'], record['root'])) != record['approval']:
         raise ValueError('ARM7 approved source context changed')
     command = execution['command']
@@ -271,4 +299,18 @@ def recheck_baselines(record, build_dir, original, build_id, started_ns):
         raise ValueError('ARM7 actual producer command/cwd differs')
     layouts = json.loads(_read(record['layout_path']))
     native = json.loads(_read(record['native_pins_path']))
+    approval = json.loads(_read(record['approval_path'], record['root']))
+    expected_pins = {record['approval_path']: _sha(_read(record['approval_path'])),
+        command[0]: approval['producer']['sha256'], command[1]: layouts[0]['identity']['parent_rom_sha256']}
+    for name, digest in approval['source_artifacts'].items():
+        expected_pins[str(_relative(record['root'], name))] = digest
+    for name in ('layout','native_pins'):
+        path = _relative(record['root'], approval[name]['path'])
+        expected_pins[str(path)] = approval[name]['sha256']
+        if str(path) != record[name+'_path']:
+            raise ValueError('ARM7 approved sidecar path differs')
+    for name in ('clang','lld'):
+        expected_pins[str(Path(native[name]['executable']).absolute())] = native[name]['sha256']
+    if record['snapshot'] != expected_pins:
+        raise ValueError('ARM7 input inventory differs from actual approved pins')
     return _receipt(record, original, layouts, native, build_dir)

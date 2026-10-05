@@ -539,11 +539,15 @@ def verify(rom, output, dsd, lld, clang, root=ROOT, stage_runner=run_command,
                 output / 'native-link/link.map', output / 'native-link/linked.elf', config.parent))
             report['source_ownership'] = ownership
 
+        arm7_operation = None
         if arm7_native_manifest:
             arm7 = load_script(root / 'tools/scripts/arm7_native_baseline.py', 'arm7_native_verify')
-            report['arm7_baselines'] = record_stage(report, 'arm7_native_baselines', lambda: arm7.build_baselines(
-                rom, output / 'arm7-native', arm7_native_manifest, arm7_native_producer,
-                root, report['build_id'], report['started_ns']))
+            def build_arm7():
+                nonlocal arm7_operation
+                arm7_operation = arm7.build_baselines(rom, output / 'arm7-native', arm7_native_manifest,
+                    arm7_native_producer, root, report['build_id'], report['started_ns'])
+                return arm7_operation.report
+            report['arm7_baselines'] = record_stage(report, 'arm7_native_baselines', build_arm7)
             snapshot.update(report['arm7_baselines']['snapshot'])
 
         def freshness():
@@ -567,7 +571,7 @@ def verify(rom, output, dsd, lld, clang, root=ROOT, stage_runner=run_command,
         packer = load_script(root / 'tools/scripts/rom_roundtrip.py', 'rom_roundtrip_verify')
         rebuilt_rom = output / 'rebuilt.nds'
         report['rom_roundtrip'] = record_stage(report, 'rom_roundtrip', lambda: packer.roundtrip_rom(
-            rom, output, regions, checkpoint, rebuilt_rom))
+            rom, output, regions, checkpoint, rebuilt_rom, arm7_operation=arm7_operation))
         record_stage(report, 'rom_freshness', lambda: require_rom_freshness(
             snapshot, report, output, rebuilt_rom, report['rom']['sha256']))
         require_stages(report['stages'], source_enabled=bool(manifest), arm7_enabled=bool(arm7_native_manifest))

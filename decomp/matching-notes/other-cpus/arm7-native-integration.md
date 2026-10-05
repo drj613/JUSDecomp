@@ -31,6 +31,15 @@ and zero-credit scope must match their declarations. Input/tool snapshots are
 rechecked before consumption. Compiler/tool symlinks are pinned by their actual
 bytes; artifact symlinks are rejected.
 
+The helper returns a live operation with an immutable private copy of that
+actual execution. Its `report` property yields a separate JSON audit copy.
+Canonical verification passes the live operation separately through packing;
+the audit report must exactly equal its captured record. Deserialized or
+rewritten reports cannot supply that operation. Standalone `rom_roundtrip.py
+--build-report` rejects ARM7 reports and requires rerunning the verifier.
+Rechecks also compare receipt to captured stdout and rebuild the complete
+expected input-pin inventory from the unchanged approved manifest/native pins.
+
 The approved builder owns ELF validation and reconstruction. Its accepted
 implementation must bind the validated ELF byte-buffer hash through publication;
 the wrapper does not implement a second ELF parser. The packer hashes and uses

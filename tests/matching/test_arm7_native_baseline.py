@@ -1,9 +1,11 @@
 """Fresh-process ARM7 orchestration contracts, using public invented ROM bytes."""
 import hashlib
+import copy
 import importlib.util
 import json
 import os
 import struct
+import subprocess
 import sys
 import tempfile
 import time
@@ -117,12 +119,13 @@ report=dict(status='opaque_physical_baselines_verified',programs=programs,parent
         self.approval_path.write_text(json.dumps(self.approval))
 
     def build(self):
-        return tool().build_baselines(self.rom, self.output, self.approval_path,
-                                      self.producer, self.root, 'PUBLIC-BUILD', self.started)
+        self.operation = tool().build_baselines(self.rom, self.output, self.approval_path,
+                                                self.producer, self.root, 'PUBLIC-BUILD', self.started)
+        return self.operation.report
 
     def consume(self, record):
         return tool().recheck_baselines(record, self.build_dir, self.rom.read_bytes(),
-                                        'PUBLIC-BUILD', self.started)
+                                        'PUBLIC-BUILD', self.started, self.operation)
 
     def test_actual_fresh_process_and_exact_parent_child_payload_writes(self):
         record = self.build()
@@ -138,7 +141,8 @@ report=dict(status='opaque_physical_baselines_verified',programs=programs,parent
             start = target['rom_offset']
             (modules / target['filename']).write_bytes(original[start:start + target['bytes']])
         rebuilt, writes = rom_roundtrip.rebuild_rom(original, modules, self.regions,
-            arm7_baselines=record, build_dir=self.build_dir, build_id='PUBLIC-BUILD', started_ns=self.started)
+            arm7_baselines=record, build_dir=self.build_dir, build_id='PUBLIC-BUILD', started_ns=self.started,
+            arm7_operation=self.operation)
         self.assertEqual(rebuilt, original)
         self.assertEqual(len(writes), 19)
         self.assertEqual([w['rom_offset'] for w in writes[-2:]], [0x300, 0xd00])
@@ -273,6 +277,55 @@ report=dict(status='opaque_physical_baselines_verified',programs=programs,parent
             self.fail(f'actual generated EABI5 soft-float metadata rejected: {error}')
         self.assertEqual(record['receipt']['programs'][0]['generated_elf_abi_flags'], 0x05000200)
         self.assertEqual(record['receipt']['programs'][0]['original_relocations'], 'unknown')
+
+    def test_changed_elf_and_rewritten_receipt_cannot_override_actual_stdout(self):
+        record = self.build()
+        elf = self.output/'artifacts/program-0/linked.elf'
+        elf.write_bytes(b'PUBLIC UNVALIDATED ELF REPLACEMENT')
+        artifact = next(a for a in record['receipt']['programs'][0]['artifacts'] if a['name']=='linked.elf')
+        artifact.update(bytes=elf.stat().st_size, sha256=digest(elf.read_bytes()))
+        (self.output/'receipt.json').write_text(json.dumps(record['receipt']))
+        with self.assertRaises(ValueError):
+            self.consume(record)
+
+    def test_changed_pin_input_and_rewritten_snapshot_cannot_override_approval(self):
+        record = self.build()
+        for path in (self.source, self.producer, self.root/'lld'):
+            saved = path.read_bytes()
+            path.write_bytes(saved+b'PUBLIC REPLACEMENT')
+            altered = copy.deepcopy(record)
+            altered['snapshot'][str(path)] = digest(path.read_bytes())
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                self.consume(altered)
+            path.write_bytes(saved)
+
+    def test_coherently_rewritten_detached_json_cannot_claim_fresh_operation(self):
+        record = json.loads(json.dumps(self.build()))
+        elf = self.output/'artifacts/program-0/linked.elf'
+        elf.write_bytes(b'PUBLIC FORGED ELF')
+        artifact = next(a for a in record['receipt']['programs'][0]['artifacts'] if a['name']=='linked.elf')
+        artifact.update(bytes=elf.stat().st_size,sha256=digest(elf.read_bytes()))
+        record['execution']['stdout'] = json.dumps(record['receipt'])
+        (self.output/'receipt.json').write_text(json.dumps(record['receipt']))
+        (self.output/'execution.json').write_text(json.dumps(record['execution']))
+        with self.assertRaises(ValueError):
+            tool().recheck_baselines(record,self.build_dir,self.rom.read_bytes(),'PUBLIC-BUILD',self.started)
+
+    def test_standalone_packer_cannot_accept_arm7_report_json_without_live_operation(self):
+        record = self.build()
+        report = self.root/'copied-build-report.json'
+        report.write_text(json.dumps({'status':'passed','artifact_hashes':{'copied.elf':'0'*64},
+                                     'arm7_baselines':record}))
+        regions = self.root/'regions.json'
+        regions.write_text(json.dumps(self.regions))
+        output, diagnostic = self.root/'standalone.nds', self.root/'standalone-report.json'
+        process = subprocess.run([sys.executable,str(ROOT/'tools/scripts/rom_roundtrip.py'),
+            '--rom',str(self.rom),'--build-dir',str(self.build_dir),'--regions',str(regions),
+            '--build-report',str(report),'--output',str(output),'--report',str(diagnostic)],
+            capture_output=True,text=True)
+        self.assertNotEqual(process.returncode,0)
+        self.assertIn('live producer operation',json.loads(diagnostic.read_text())['failure'])
+        self.assertFalse(output.exists())
 
     def test_optional_stage_variant_requires_pair_before_freshness(self):
         import verify
