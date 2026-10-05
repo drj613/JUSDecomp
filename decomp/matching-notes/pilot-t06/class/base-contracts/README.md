@@ -146,3 +146,11 @@ unresolved. No constructors or destructors in this analysis are promoted to
 new source. The virtual configuration candidate's unproven nonzero invariant
 and incoming saved-register failure paths remain blocked; this analysis neither
 reopens that candidate nor invents a precondition.
+
+## Independent verification
+
+Root hashes all 25 function extents directly from the pinned original ROM.
+The reviewer also verifies the baseline ELF/extraction, zero BSS extent,
+metadata and canonical source pins, and the bounded original call chains.
+[Root verification](root-verification.json) records these checks. The notes
+add zero source bytes and leave native ownership types and T06 unresolved.
