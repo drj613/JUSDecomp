@@ -23,9 +23,9 @@ class CommonEffectConstructor(unittest.TestCase):
             directory = Path(directory)
             command = [os.environ['JUS_CLASS_WIBO'], os.environ['JUS_CLASS_MWCC'],
                        '-c', '-proc', 'arm946e', '-Cpp_exceptions', 'off', '-nostdinc']
-            def compile(name, flags, expect_success=True):
+            def compile(name, flags, expect_success=True, source=SOURCE):
                 path = directory / name
-                completed = subprocess.run([*command, *flags, '-o', str(path), str(SOURCE)],
+                completed = subprocess.run([*command, *flags, '-o', str(path), str(source)],
                                            capture_output=True, text=True)
                 if expect_success:
                     self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
@@ -45,7 +45,9 @@ class CommonEffectConstructor(unittest.TestCase):
                 {'section': '.text', 'offset': 56, 'type': 2, 'symbol': 'data_0209e114', 'addend': 0},
                 {'section': '.text', 'offset': 60, 'type': 2, 'symbol': 'data_020afc40', 'addend': 0}])
             before = gate.sha256(accepted)
-            compile('wrong-offset.o', ['-O2', '-DT06_UNKNOWN_BASE_BYTES=0x7a'], False)
+            wrong_offset = directory / 'wrong-offset.cpp'
+            wrong_offset.write_text(SOURCE.read_text().replace('unknown_04_7f[0x7c]', 'unknown_04_7f[0x7a]'))
+            compile('wrong-offset.o', ['-O2'], False, wrong_offset)
             changed = compile('changed-base.o', ['-O2', '-Dfunc_02015d0c=func_02015d70'])
             with self.assertRaisesRegex(ValueError, 'relocation identities'):
                 gate.compare_objects(accepted, changed, ['func_0206ca4c'])

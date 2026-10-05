@@ -1,13 +1,10 @@
 // ARM physical storage view only; this does not redefine the recovered class.
-#ifndef T06_UNKNOWN_BASE_BYTES
-#define T06_UNKNOWN_BASE_BYTES 0x7c
-#endif
 class CommonEffectAbi;
 typedef unsigned int Word;
 typedef unsigned short Halfword;
 struct CommonEffectStorage {
     Word vptr;
-    unsigned char unknown_04_7f[T06_UNKNOWN_BASE_BYTES];
+    unsigned char unknown_04_7f[0x7c];
     Halfword member_80;
     unsigned char unknown_82_83[2];
 };
