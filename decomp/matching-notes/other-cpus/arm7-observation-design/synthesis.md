@@ -44,8 +44,9 @@ distinct observations. Ordinary fallthrough includes the span end; it is not a
 function-end claim. Numeric target arithmetic must apply the architectural pipeline bias exactly
 once. Tests exposed unarm1.9.2 ARM BranchDest sign-extending an already shifted
 displacement to24 rather than26 bits. The observer derives direct ARM B/BL
-from signed raw imm24 shifted two plusPC8; Thumb uses its validated parsed
-destination. This local interpretation fix changes no dependency or ARM9 path. Branches inside a
+from signed raw imm24 shifted two plusPC8. All direct Thumb forms now derive
+targets from validated raw fields; combined BL recovers its checked prefix
+and addsPC4 after signed-payload extension. This local interpretation fix changes no dependency or ARM9 path. Branches inside a
 combined Thumb BL must be classified as instruction interiors.
 
 BX and other PC writes remain unresolved, without fabricated register values,
@@ -106,3 +107,20 @@ normalization inside the observer, which owns target interpretation. The nine
 behavior tests then passed. Extreme positive/negative raw imm24 and formatted
 operand regressions remain required. This is one source-grounded correction,
 not recurring architecture friction or a reason to change the chosen boundary.
+
+A second boundary test refuted combined Thumb BL arithmetic: f3ff/fffe
+must yield source+00400000 but the locked decoder yielded source-00400000
+by addingPC4 before signed23 extension. Short and conditional Thumb B tests
+passed before normalization and are not confirmed dependency defects. The
+observer now derives every direct ARM/Thumb branch target from validated
+raw fields, formats the corrected operand once and preserves uncertain
+mapping/modes. Fourteen observer tests passed after this change.
+
+Both concrete defects are absorbed inside the existing branch interpretation
+owner with no new parameters, types or ownership workaround. They generalize
+one invalid dependency assumption; they do not expose repeated architectural
+friction requiring a new design. The shared dependency/legacy repair remains
+follow-up jus-bjry.16. Independent native LLVM23.1.2 assembly, linkage and
+disassembly confirmed four ARM and three Thumb target encodings in the public
+llvm-branch-oracle artifacts. Actual library/probe/compatibility acceptance
+still requires the final independent rebuild and review.
