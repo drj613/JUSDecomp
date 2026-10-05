@@ -45,6 +45,13 @@ ignored `build/verify-t06-deleting`; `proof.json` commits metadata only.
 Measured work comprised two bounded compiler contexts, one source-body revision
 and one successful fresh full-pipeline attempt. The recorded verifier runtime
 is measured; total human effort was not independently timed. Constructor,
-factory, clone, initializer and callback-installer source remain fallback.
+factory, clone, initializer and virtual object-configuration method source remain fallback.
 Base member types, callback interfaces, native virtual-class ownership and
 T07 runtime behavior checks remain unresolved. T06 is not complete.
+
+Independent root reproduction at producer `c7c61f2` passes all 19 stages
+with the same 104 source bytes. The [root report](root-canonical-report.json)
+records every live artifact and source hash; the [root test log](root-tests.log)
+records 206 passing tests without skips using the pinned compiler and all
+private reference inputs. Independent review also reruns both rejected
+compiler trials against the actual original reference.

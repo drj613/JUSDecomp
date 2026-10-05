@@ -327,7 +327,7 @@
   "remaining_unknowns": [
     "Native virtual-class declaration and ownership semantics",
     "Constructor, factory and clone source matching",
-    "Initializer and callback-installer source matching",
+    "Initializer and virtual object-configuration method source matching",
     "Base member types and callback interfaces",
     "Runtime behavior checks queued for T07; no emulator work performed"
   ]

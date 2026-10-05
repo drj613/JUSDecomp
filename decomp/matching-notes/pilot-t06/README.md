@@ -35,7 +35,7 @@ an independently tested gate extension is required before those objects can pass
 T06 closes only after a complete bounded class/family and measured effort have
 been verified. Runtime smoke testing remains T07's serialized emulator work.
 
-## Verified partial promotion
+## First verified promotion checkpoint
 
 Producer commit `47aa4b8` registers the 32-byte `__FindExceptionTable` C runtime
 helper and 20-byte `func_0206d010` C++ destructor ABI bridge. Together with the
@@ -62,3 +62,14 @@ one explicit callback literal is `func_0206ceac`, passed to `func_02028384`
 under flag `0x10`. Several saved registers are only initialized on nonzero
 lookup but used after falling-through failure paths. The caller invariant is
 not yet established; candidate source must preserve the observed behavior.
+
+## Current verified source coverage
+
+Producer `c7c61f2` adds the 28-byte deleting-destructor entry `func_0206cfa4`.
+The [fresh root report](class/deleting/root-canonical-report.json) passes all
+19 stages and exact whole-ROM comparison with four selected source units.
+Current coverage is 104 bytes: 72 game and 32 SDK, comprising 92 instruction
+bytes and 12 literal bytes. All 206 tests pass without skips.
+Five published class targets remain exact fallback. The [entry's ABI limits](class/deleting/README.md)
+preserve the observed call and return interface without asserting ownership.
+T06 remains open and the global source percentage remains unknown.
