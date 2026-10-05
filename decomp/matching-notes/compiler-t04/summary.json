@@ -8,14 +8,15 @@
   "exact_original_matches": 0,
   "source_promotions": 0,
   "public_tests": {
-    "tests": 9,
-    "all_matching_tests": 88,
-    "skipped": 1,
+    "tests": 10,
+    "all_matching_tests": 124,
+    "skipped": 0,
     "result": "passed"
   },
   "reproduction": {
     "reference_split_exit_status": 0,
     "all_four_reference_hashes_reproduced": true
   },
-  "report_sha256": "f00514056af802c2bd3a2d33943aeea2a62618d473ff4290fca3e960351b308b"
+  "report_sha256": "623e2feca0026b492e50873abf606090213066d40b0080a392e2a177fef21a9b",
+  "producer_commit": "9495e76e86908510e8f6ddb11be63500404ae5c4"
 }

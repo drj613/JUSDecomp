@@ -6,6 +6,24 @@ indirect call through an object table. All 288 compilations succeeded across
 Every compiler choice remains unresolved. These files contribute zero source
 coverage and do not change the production source manifest.
 
+The integrated production manifest separately pins the trampoline's compiler
+and runner per TU. Its ABI uses ARM, little-endian 32-bit pointers, and the
+pinned compiler defaults. It disables ambient includes. The production and
+experimental gates share a header policy that rejects forced headers,
+response files, and disguised include directives. Header dependencies require
+compiler dependency capture before a header-bearing TU can be promoted.
+
+The [symbol report](symbol-report.json) accepts three reviewed aliases:
+`ComicDeckCreate`, `KShapeLookup`, and the untyped `ComicDeckManagerPointer`.
+It verifies local document hashes and closed-bead provenance, then rechecks
+the actual trampoline objects and authoritative module extent. Linker names
+remain unchanged; no structure layouts or C prototypes are imported.
+
+The final integrated [ROM evidence](../rom-t08/README.md) records 124 passing
+tests and fresh source/reference builds at commit `9495e76`. The final sweep
+uses that commit's shared header policy. The historical first sweep is
+superseded by this report, with the same 288 nonmatching outputs.
+
 [The experiment manifest](../../compiler-experiments.json) pins source hashes,
 reference object hashes, compiler binaries and DLLs, the runner, and per-symbol
 CPU, flags, ABI descriptions, and include context. [The report](report.json)
