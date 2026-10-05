@@ -43,7 +43,8 @@
     "triage/request-caller-context.json": "caa85b73f08f74c178b41a4ed849f6386916f84f52bb725e2bdc657722b08012",
     "triage/request-cf18-predecessor.json": "668497fa776bbe646f529c7a5c7a05db0dc7df66331c9aedf0495a014c798d95",
     "triage.json": "bc8ee39a731209b5a6158f6b2099d3c6ee5ff5a50579938dae9d5d272e374f42",
-    "trial-proof.json": "5066f5da410fc6809eac804ae953d24bf6ac0c12d70404df496cba5fac2919f7"
+    "trial-proof.json": "5066f5da410fc6809eac804ae953d24bf6ac0c12d70404df496cba5fac2919f7",
+    "independent/fresh-closed-trial-proof.json": "10568256ccf398a8cfe5bb6a6f06f817c239eeb6cb7b4653f79170b747b31645"
   },
   "source_bytes": 0,
   "original_function_ownership": "unknown",
