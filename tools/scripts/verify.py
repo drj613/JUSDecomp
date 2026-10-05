@@ -82,12 +82,20 @@ def require_stage_sequence(stages, required):
         raise ValueError('verification stage order differs from required pipeline')
 
 
-def require_stages(stages, source_enabled=False):
-    require_stage_sequence(stages, SOURCE_STAGES if source_enabled else REQUIRED_STAGES)
+def required_stages(source_enabled=False, arm7_enabled=False):
+    stages = SOURCE_STAGES if source_enabled else REQUIRED_STAGES
+    if arm7_enabled:
+        index = stages.index('freshness')
+        stages = (*stages[:index], 'arm7_native_baselines', *stages[index:])
+    return stages
 
 
-def verified_module_checkpoint(report, source_enabled=False):
-    required = SOURCE_MODULE_STAGES if source_enabled else MODULE_STAGES
+def require_stages(stages, source_enabled=False, arm7_enabled=False):
+    require_stage_sequence(stages, required_stages(source_enabled, arm7_enabled))
+
+
+def verified_module_checkpoint(report, source_enabled=False, arm7_enabled=False):
+    required = required_stages(source_enabled, arm7_enabled)[:-2]
     require_stage_sequence(report['stages'], required)
     checkpoint = copy.deepcopy(report)
     checkpoint['status'] = 'passed'
@@ -364,7 +372,8 @@ def direct_comparison(rom, output, expected):
 
 
 def verify(rom, output, dsd, lld, clang, root=ROOT, stage_runner=run_command,
-           source_manifest=None, source_compiler=None, compiler_runner=None):
+           source_manifest=None, source_compiler=None, compiler_runner=None,
+           arm7_native_manifest=None, arm7_native_producer=None):
     output = output.resolve()
     report = {'schema_version': 1, 'build_id': str(uuid.uuid4()), 'status': 'failed',
               'started_ns': time.time_ns(), 'stages': [],
@@ -377,12 +386,17 @@ def verify(rom, output, dsd, lld, clang, root=ROOT, stage_runner=run_command,
             report_path = output.parent / f'{output.name}.rejected-{report["build_id"]}.json'
             raise ValueError('output already exists; supply a fresh build directory')
         output.mkdir(parents=True)
+        if bool(arm7_native_manifest) != bool(arm7_native_producer):
+            raise ValueError('ARM7 native integration needs both approved manifest and producer')
         sources = [root / 'tools/scripts' / name for name in
                    ('verify.py', 'baseline_intake.py', 'native_link.py', 'rom_roundtrip.py')]
         sources += [root / 'decomp/toolchain.lock.json', root / 'decomp/rom-manifest.json',
                     root / 'decomp/matching-notes/baseline-t01/executable-regions.json',
                     root / 'decomp/matching-notes/baseline-t01/reference-relocations.json']
         sources += sorted((root / 'decomp/arm9').rglob('*'))
+        if arm7_native_manifest:
+            sources += [arm7_native_manifest, root / 'tools/scripts/arm7_native_baseline.py',
+                        root / 'tools/scripts/other_executables.py']
         sources = [p for p in sources if p.is_file()]
         checker_path = root / 'tools/scripts/relocation_check.py'
         if checker_path.is_file():
@@ -525,11 +539,20 @@ def verify(rom, output, dsd, lld, clang, root=ROOT, stage_runner=run_command,
                 output / 'native-link/link.map', output / 'native-link/linked.elf', config.parent))
             report['source_ownership'] = ownership
 
+        if arm7_native_manifest:
+            arm7 = load_script(root / 'tools/scripts/arm7_native_baseline.py', 'arm7_native_verify')
+            report['arm7_baselines'] = record_stage(report, 'arm7_native_baselines', lambda: arm7.build_baselines(
+                rom, output / 'arm7-native', arm7_native_manifest, arm7_native_producer,
+                root, report['build_id'], report['started_ns']))
+            snapshot.update(report['arm7_baselines']['snapshot'])
+
         def freshness():
             require_unchanged(snapshot)
             directories = ('config', 'delinks', 'linked', 'native-link')
             if manifest:
                 directories += ('candidate-config', 'candidate-delinks', 'source-build')
+            if arm7_native_manifest:
+                directories += ('arm7-native',)
             artifacts = sorted(p for directory in directories
                                for p in (output / directory).rglob('*') if p.is_file())
             for path in artifacts:
@@ -539,14 +562,15 @@ def verify(rom, output, dsd, lld, clang, root=ROOT, stage_runner=run_command,
             return {'artifact_count': len(artifacts), 'inputs_unchanged': True}
 
         record_stage(report, 'freshness', freshness)
-        checkpoint = verified_module_checkpoint(report, source_enabled=bool(manifest))
+        checkpoint = verified_module_checkpoint(report, source_enabled=bool(manifest),
+                                                 arm7_enabled=bool(arm7_native_manifest))
         packer = load_script(root / 'tools/scripts/rom_roundtrip.py', 'rom_roundtrip_verify')
         rebuilt_rom = output / 'rebuilt.nds'
         report['rom_roundtrip'] = record_stage(report, 'rom_roundtrip', lambda: packer.roundtrip_rom(
             rom, output, regions, checkpoint, rebuilt_rom))
         record_stage(report, 'rom_freshness', lambda: require_rom_freshness(
             snapshot, report, output, rebuilt_rom, report['rom']['sha256']))
-        require_stages(report['stages'], source_enabled=bool(manifest))
+        require_stages(report['stages'], source_enabled=bool(manifest), arm7_enabled=bool(arm7_native_manifest))
         if manifest:
             report['source_coverage'] = accounting.summarize_coverage(ownership, config.parent,
                                                                      verification_passed=True)
@@ -563,14 +587,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('rom', 'output', 'dsd', 'lld', 'clang'):
         parser.add_argument('--' + name, required=True, type=Path)
-    for name in ('source-manifest', 'source-compiler', 'compiler-runner'):
+    for name in ('source-manifest', 'source-compiler', 'compiler-runner',
+                 'arm7-native-manifest', 'arm7-native-producer'):
         parser.add_argument('--' + name, type=Path)
     args = parser.parse_args()
     report, path = verify(args.rom.resolve(), args.output, tool_argument(args.dsd),
                           tool_argument(args.lld), tool_argument(args.clang),
                           source_manifest=args.source_manifest.resolve() if args.source_manifest else None,
                           source_compiler=tool_argument(args.source_compiler) if args.source_compiler else None,
-                          compiler_runner=tool_argument(args.compiler_runner) if args.compiler_runner else None)
+                          compiler_runner=tool_argument(args.compiler_runner) if args.compiler_runner else None,
+                          arm7_native_manifest=args.arm7_native_manifest.resolve() if args.arm7_native_manifest else None,
+                          arm7_native_producer=tool_argument(args.arm7_native_producer) if args.arm7_native_producer else None)
     print(json.dumps({'status': report['status'], 'report': str(path)}))
     return 0 if report['status'] == 'passed' else 1
 

@@ -114,7 +114,8 @@ def _layout(original, regions):
                      'files': files}
 
 
-def rebuild_rom(original, module_dir, regions):
+def rebuild_rom(original, module_dir, regions, arm7_baselines=None, build_dir=None,
+                build_id=None, started_ns=None):
     """Read every linked module and write every declared ARM9 payload extent."""
     targets, _ = _layout(original, regions)
     rebuilt = bytearray(original)
@@ -131,6 +132,26 @@ def rebuild_rom(original, module_dir, regions):
         rebuilt[start:start + len(payload)] = payload
         writes.append({'module': target['module'], 'input_file': target['filename'],
                        'rom_offset': start, 'size_bytes': len(payload), 'sha256': digest})
+    if arm7_baselines is not None:
+        from arm7_native_baseline import recheck_baselines
+        payloads = recheck_baselines(arm7_baselines, build_dir, original, build_id, started_ns)
+        occupied = [(target['rom_offset'], target['rom_offset']+target['bytes']) for target in targets]
+        for payload in payloads:
+            start, data = payload['rom_offset'], payload['data']
+            end = start + len(data)
+            if start < payload['program_start']+0x160 or end > payload['program_end']:
+                raise ValueError('ARM7 write overlaps header or escapes selected program')
+            if any(start < stop and begin < end for begin, stop in occupied):
+                raise ValueError('ARM7 native write overlaps another executable payload')
+            occupied.append((start,end))
+            rebuilt[start:end] = data
+            if payload['identity']['program']['kind'] == 'nitro_fs':
+                child = rebuilt[payload['program_start']:payload['program_end']]
+                if _hashes(child)['sha256'] != payload['identity']['program_sha256']:
+                    raise ValueError('ARM7 native child write changes whole child identity')
+            writes.append({'module':'ARM7', 'identity':payload['identity'],
+                'input_file':payload['image_path'], 'linked_elf':payload['elf_path'],
+                'rom_offset':start, 'size_bytes':len(data), 'sha256':payload['sha256'], 'source_bytes':0})
     return bytes(rebuilt), writes
 
 
@@ -197,7 +218,10 @@ def _verify_build(original_rom, original, build_dir, regions, report):
     if bool(source) != source_stages:
         raise ValueError('source build report/stage provenance differs')
     if hasattr(build_verifier, 'verified_module_checkpoint'):
-        build_verifier.verified_module_checkpoint(report, source_enabled=source_stages)
+        arm7_stages = any(stage['name']=='arm7_native_baselines' for stage in report['stages'])
+        if bool(report.get('arm7_baselines')) != arm7_stages:
+            raise ValueError('ARM7 native report/stage provenance differs')
+        build_verifier.verified_module_checkpoint(report, source_enabled=source_stages, arm7_enabled=arm7_stages)
     else:
         build_verifier.require_stages(report['stages'], source_enabled=source_stages)
     started = report['started_ns']
@@ -242,6 +266,12 @@ def _verify_build(original_rom, original, build_dir, regions, report):
                                             build_dir / 'candidate-config')
         if ownership != report['source_ownership']:
             raise ValueError('actual source ownership differs from passed build report')
+    if report.get('arm7_baselines'):
+        from arm7_native_baseline import recheck_baselines
+        recheck_baselines(report['arm7_baselines'], build_dir, original, report['build_id'], report['started_ns'])
+        arm7_files = {str(p.relative_to(build_dir)) for p in (build_dir/'arm7-native').rglob('*') if p.is_file()}
+        if not arm7_files <= report['artifact_hashes'].keys():
+            raise ValueError('ARM7 actual artifacts absent from freshness provenance')
     return {'producer_build_id': report['build_id'], 'source_enabled': source_stages,
             'linked_elf_sha256': _hash(build_dir / 'native-link/linked.elf'),
             'link_inputs_sha256': _hash(build_dir / 'native-link/link-inputs.json'),
@@ -259,7 +289,9 @@ def roundtrip_rom(original_rom, build_dir, regions, verified_build, output_rom):
     original = original_rom.read_bytes()
     _identity(original, regions)
     provenance = _verify_build(original_rom, original, build_dir, regions, verified_build)
-    rebuilt, writes = rebuild_rom(original, build_dir / 'native-link', regions)
+    rebuilt, writes = rebuild_rom(original, build_dir / 'native-link', regions,
+        arm7_baselines=verified_build.get('arm7_baselines'), build_dir=build_dir,
+        build_id=verified_build['build_id'], started_ns=verified_build['started_ns'])
     result = verify_repacked_rom(original, rebuilt, regions)
     # Check current artifacts again before publishing the private output file.
     _verify_build(original_rom, original, build_dir, regions, verified_build)
