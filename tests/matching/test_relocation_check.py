@@ -161,6 +161,8 @@ class RelocationCheckTests(unittest.TestCase):
     def test_reference_source_mapping_must_agree_with_branch_encoding(self):
         result = self.validate(*fixture(kind=1, addend=-8, source_thumb=True))
         self.assertEqual(result['status'], 'unresolved', result)
+        self.assertIn('source_mode_fallbacks', result)
+        self.assertEqual(result['source_mode_fallbacks']['count'], 0)
 
     def test_thumb_function_covers_resume_after_pool_without_new_mapping_symbol(self):
         reference = make_elf([('.text', 0, bytes(32))], [
@@ -180,7 +182,15 @@ class RelocationCheckTests(unittest.TestCase):
             ('source_function', 0x1001, 0x12, 1),
             ('destination', 0x1011, 0x12, 1),
         ], elf_type=2)
-        self.assertEqual(self.validate(bytes(raw), linked)['status'], 'passed')
+        result = self.validate(bytes(raw), linked)
+        self.assertEqual(result['status'], 'passed')
+        self.assertIn('source_mode_fallbacks', result)
+        self.assertEqual(result['source_mode_fallbacks']['count'], 1)
+        fallback = result['source_mode_fallbacks']['contexts'][0]
+        self.assertEqual(fallback['source'], 0x1008)
+        self.assertEqual(fallback['module'], 'ARM9')
+        self.assertEqual(fallback['mapping_mode'], 'd')
+        self.assertEqual(fallback['function_mode'], 't')
 
     def test_branch_addends_are_not_replaced_with_default_pc_bias(self):
         for kind, addend in ((1, -4), (10, 0)):
@@ -231,6 +241,24 @@ class RelocationCheckTests(unittest.TestCase):
         ], [('.rela.text', 1, [(0, 1, 2, 0)])])
         self.assertEqual(self.validate(ref, linked)['status'], 'unresolved')
 
+    def test_malformed_elf_tables_or_section_extents_never_pass(self):
+        reference, linked = fixture()
+        tool = load_tool()
+        elf = tool.Elf32(reference)
+        rela_index = next(i for i, section in enumerate(elf.sections) if section[1] == 4)
+        string_index = elf.sections[elf.sym_index][6]
+        corruptions = (
+            ('RELA sh_link', rela_index, 6, elf.names_index),
+            ('symtab entry size', elf.sym_index, 9, 8),
+            ('symtab string table kind', string_index, 1, 1),
+            ('file-backed extent', 1, 5, len(reference) + 16),
+        )
+        for name, section_index, field, value in corruptions:
+            with self.subTest(name=name):
+                raw = bytearray(reference)
+                struct.pack_into('<I', raw, elf.sh_offset + section_index * 40 + field * 4, value)
+                self.assertEqual(self.validate(bytes(raw), linked)['status'], 'unresolved')
+
     def test_same_vma_overlay_target_requires_matching_section_identity(self):
         reference = make_elf([('.text', 0, bytes(32))], [
             ('overlay_target', 16, 0x12, 1), ('$a', 0, 0, 1),
@@ -262,6 +290,19 @@ class RelocationCheckTests(unittest.TestCase):
             path = Path(directory) / 'linked.elf'
             path.write_bytes(linked)
             self.assertEqual(load_tool().validate_relocations([], path)['status'], 'unresolved')
+
+    def test_multiple_reference_objects_in_same_module_require_placement_evidence(self):
+        ref, linked = fixture()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            references = [root / '_dsd_gap@main_0.o', root / '_dsd_gap@main_1.o']
+            binary = root / 'linked.elf'
+            for path in references:
+                path.write_bytes(ref)
+            binary.write_bytes(linked)
+            result = load_tool().validate_relocations(references, binary)
+            self.assertEqual(result['status'], 'unresolved', result)
+            self.assertIn('per-object section placement', str(result['findings']))
 
     def test_cli_failure_has_nonzero_exit_and_reports_exact_bad_target(self):
         self.assertTrue(SCRIPT.exists(), 'relocation validator missing')

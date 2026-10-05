@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Check direct dsd ARM RELA destinations against a native linked ELF.
 
-Supports ABS32, legacy ARM PC24 B/BL and Thumb1 PC22 BL/BLX. The input
-objects retain dsd's original symbol offsets and mapping symbols. Module
-placement comes from the linked LCF *_START symbols; module hashes and symbol
+Supports ABS32, legacy ARM PC24 B/BL and Thumb1 PC22 BL/BLX for the current
+one-original-gap-object-per-module baseline. The input objects retain dsd's
+original symbol offsets and mapping symbols. Input section placement comes
+from linked LCF *_START symbols; multiple objects in one module require
+per-object placement evidence and remain unresolved. Module hashes and symbol
 layout must also be checked by the caller. Veneers and other relocation forms
-are not supported and never earn a passing result.
+are not supported and never earn a passing result. Results expose every use
+of enclosing-function mode when a source mapping is absent or stale $d.
 """
 import argparse
 import bisect
@@ -20,6 +23,30 @@ from native_link import Elf32
 
 class Unresolved(ValueError):
     """The input cannot be checked with the supported direct-relocation rules."""
+
+
+def _checked_elf(path):
+    data = Path(path).read_bytes()
+    elf = Elf32(data)
+    if struct.unpack_from('<H', data, 40)[0] != 52:
+        raise Unresolved('unsupported ELF header size')
+    for section in elf.sections:
+        if section[1] not in (0, 8) and section[4] + section[5] > len(data):
+            raise Unresolved('file-backed section extent exceeds ELF file')
+    symtabs = [i for i, s in enumerate(elf.sections) if s[1] == 2]
+    if len(symtabs) != 1:
+        raise Unresolved('requires exactly one symbol table')
+    symtab = elf.sections[elf.sym_index]
+    if symtab[9] != 16 or symtab[5] % 16:
+        raise Unresolved('unsupported symbol table entry size')
+    if not 0 < symtab[6] < len(elf.sections) or elf.sections[symtab[6]][1] != 3:
+        raise Unresolved('symbol table sh_link must identify a string table')
+    if elf.sections[elf.names_index][1] != 3:
+        raise Unresolved('section name table must be a string table')
+    for section in elf.sections:
+        if section[1] in (4, 9) and section[6] != elf.sym_index:
+            raise Unresolved('relocation sh_link must identify the selected symbol table')
+    return elf
 
 
 def _module(path):
@@ -68,7 +95,9 @@ def validate_relocations(reference_objects: list[Path], linked_elf: Path) -> dic
     """
     counts = {'total': 0, 'validated': 0, 'failed': 0, 'unresolved': 0}
     result = {'status': 'unresolved', 'counts': counts, 'relocation_types': {},
-              'modules': {}, 'findings': [], 'findings_truncated': False}
+              'modules': {}, 'findings': [], 'findings_truncated': False,
+              'placement_scope': 'one_original_gap_object_per_module',
+              'source_mode_fallbacks': {'count': 0, 'contexts': []}}
 
     def record(status, reason, context=None):
         counts[status] += 1
@@ -84,7 +113,7 @@ def validate_relocations(reference_objects: list[Path], linked_elf: Path) -> dic
     try:
         if not reference_objects:
             raise Unresolved('empty reference object inventory')
-        linked = Elf32(Path(linked_elf).read_bytes())
+        linked = _checked_elf(linked_elf)
         if struct.unpack_from('<H', linked.data, 16)[0] != 2:
             raise Unresolved('linked ELF must be executable ET_EXEC')
         linked_symbols = defaultdict(list)
@@ -107,12 +136,16 @@ def validate_relocations(reference_objects: list[Path], linked_elf: Path) -> dic
         references = []
         definitions = defaultdict(list)
         branch_names = set()
+        reference_modules = set()
         for path in reference_objects:
             path = Path(path)
             region = _module(path)
+            if region in reference_modules:
+                raise Unresolved(f'multiple reference objects in {region}: per-object section placement evidence required')
+            reference_modules.add(region)
             if region not in linked_sections:
                 raise Unresolved(f'linked module section missing: {region}')
-            elf = Elf32(path.read_bytes())
+            elf = _checked_elf(path)
             if struct.unpack_from('<H', elf.data, 16)[0] != 1:
                 raise Unresolved(f'reference must be relocatable ET_REL: {path.name}')
             symbols = elf.symbols()
@@ -242,8 +275,13 @@ def validate_relocations(reference_objects: list[Path], linked_elf: Path) -> dic
                                 owners = {mode(reference, s) for s in reference['symbols']
                                           if s[3] & 15 == 2 and s[5] == section[7]
                                           and s[1] <= offset < s[1] + s[2]}
-                                if len(owners) == 1:
+                                if len(owners) == 1 and owners <= {'a', 't'}:
+                                    original_mapping = source_mode
                                     source_mode = owners.pop()
+                                    fallbacks = result['source_mode_fallbacks']
+                                    fallbacks['count'] += 1
+                                    fallbacks['contexts'].append(dict(context,
+                                        mapping_mode=original_mapping, function_mode=source_mode))
                             if source_mode != ('a' if kind == 1 else 't'):
                                 raise Unresolved('reference source mapping disagrees with branch encoding')
                             if target_mode not in ('a', 't'):
