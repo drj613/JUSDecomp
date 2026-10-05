@@ -7,6 +7,7 @@ ARM9 metadata unchanged.
 1. Download the pinned native dsd binary and check its digest.
 
 ```sh
+set -eu
 mkdir -p tools/dsd
 gh release download v0.12.0 --repo AetiasHax/ds-decomp \
   --pattern dsd-macos-arm64 --dir tools/dsd
@@ -24,8 +25,8 @@ The version output must be `ds-decomp-cli 0.12.0`.
 ```sh
 export JUS_ROM=/absolute/path/to/your/jus.nds
 python3 tools/scripts/baseline_intake.py \
-  --rom "$JUS_ROM" --output build/intake.json
-test ! -e build/baseline-t01
+  --rom "$JUS_ROM" --output build/intake.json || exit 1
+test ! -e build/baseline-t01 || exit 1
 mkdir -p build/baseline-t01/logs
 tools/dsd/dsd-macos-arm64 rom extract -r "$JUS_ROM" \
   -o build/baseline-t01/extract > build/baseline-t01/logs/extract.log 2>&1
