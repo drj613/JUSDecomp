@@ -119,3 +119,11 @@ and 44 literal bytes. All 216 tests pass without skips.
 Two published class targets remain exact fallback: the initializer and virtual
 object-configuration method. Class ownership and runtime verification remain
 unresolved; T06 stays open. Global source coverage remains unknown.
+
+[Base lifecycle observations](class/base-contracts/README.md) record the
+verified field operations and storage release boundaries while leaving
+semantic ownership unresolved. The
+[configuration entry-state blocker](virtual-config-blocker/README.md)
+records static failure paths that consume incoming saved-register state;
+actual live failure and a universal success invariant remain unproved.
+Both notes earn zero source credit.
