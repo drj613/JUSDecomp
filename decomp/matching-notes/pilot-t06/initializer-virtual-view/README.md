@@ -69,3 +69,13 @@ python3 decomp/matching-notes/pilot-t06/initializer-virtual-view/reproduce.py \
 Add `--contexts decomp/matching-notes/pilot-t06/initializer-virtual-view/constructor-contexts.json` for the 14 constructor contexts or `constructor-inline-contexts.json` for the four additional contexts, each with a fresh output directory. The reference directory must contain `src/main/common_effect_init.o` matching the saved reference SHA256.
 
 The three `*-report.json` files record all 60 completed strict trials. `verification.json` also records the four preliminary `-O2` inspections and the first constructor sweep's reporting abort after one successful compile: the reporter initially assumed unique section names, then gained a metadata-only fallback retaining the complete rejected inventory. That aborted reporter run is recorded separately from the 60 completed matrix trials. No tool/source binaries or original byte payloads are published.
+
+## Independent integration verification
+
+The independent reviewer verified all 60 private object hashes and reran
+every strict comparison, reproducing all recorded rejections. Mismatch
+positions and rejected extra sections agree with the reports. All six new
+real-tool tests ran, and the complete root suite passes 222 tests without
+skips. [Root verification](root-verification.json) and
+[root tests](root-tests.log) record this result. Canonical source coverage
+remains seven functions and 304 bytes; this initializer stays in fallback.
