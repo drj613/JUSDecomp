@@ -65,7 +65,7 @@
   "T10_complete": false,
   "canonical_production_pins_changed": false,
   "public_evidence_sha256": {
-    ".gitattributes": "ba6da4d442b50debae7a5a79ca742c6cc7a8346028d02fbceb9bd855efcb6fe3",
+    ".gitattributes": "bd2b8693346f051fc3dc01c11a5efaaeeea9814a89cf13f1cdba7225f8d144e3",
     "LICENSE.ds-decomp": "6868b9ef46509224c823cc2f80d2d0bbd37086f89bb3ce2a570c0b04f0bb4a7b",
     "LICENSE.unarm": "6868b9ef46509224c823cc2f80d2d0bbd37086f89bb3ce2a570c0b04f0bb4a7b",
     "audit_sources.py": "9154acb124c2ee75b84a9e75007481a17a93c2eeb01bb17b50cb658d1aa03834",
