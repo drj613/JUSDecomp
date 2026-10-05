@@ -3,8 +3,10 @@
 The option requires a freshly executed, independently approved physical ARM7
 producer. It accepts no prebuilt payload directory or detached success report.
 The [approval template](arm7-native-approval.pending.json) is deliberately
-pending and rejects. Root must supply reviewed producer/source/native-tool pins
-after the native baseline and ELF snapshot fix pass acceptance.
+pending and rejects. The independently reviewed producer now has an
+[approved capsule](arm7-physical-baseline/approval.json), including the ELF
+snapshot fix and reviewed source/native-tool pins. That approval covers the
+producer; canonical integration acceptance remains separate.
 
 The existing verifier arguments remain. To enable the candidate add:
 
@@ -53,4 +55,4 @@ Public invented-ROM tests execute a real fixture producer to prove orchestration
 and failure handling, not native ELF correctness. The candidate does not grant
 source bytes or functions. ARM9 17-module/87,493-relocation/304-byte source
 contracts and global unknown scope remain separate. Actual optional full-ROM
-acceptance awaits the final reviewed Rust producer and root proof.
+acceptance awaits independent root integration review and proof.

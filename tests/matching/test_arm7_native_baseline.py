@@ -192,8 +192,9 @@ report=dict(status='opaque_physical_baselines_verified',programs=programs,parent
             with self.subTest(path=path), self.assertRaises(ValueError):
                 self.consume(record)
             path.write_bytes(saved)
-        with self.assertRaises(ValueError):
-            tool().recheck_baselines(record, self.build_dir, self.rom.read_bytes(), 'OTHER', self.started)
+        with self.assertRaisesRegex(ValueError, 'current build'):
+            tool().recheck_baselines(record, self.build_dir, self.rom.read_bytes(), 'OTHER', self.started,
+                                    self.operation)
         with self.assertRaises(ValueError):
             self.build()
 
@@ -266,8 +267,9 @@ report=dict(status='opaque_physical_baselines_verified',programs=programs,parent
         for offset in (0x34, 0xb34):
             changed = bytearray(self.rom.read_bytes())
             changed[offset] ^= 1
-            with self.subTest(offset=offset), self.assertRaises(ValueError):
-                tool().recheck_baselines(record, self.build_dir, bytes(changed), 'PUBLIC-BUILD', self.started)
+            with self.subTest(offset=offset), self.assertRaisesRegex(ValueError, 'original.*identity'):
+                tool().recheck_baselines(record, self.build_dir, bytes(changed), 'PUBLIC-BUILD', self.started,
+                                        self.operation)
 
     def test_actual_generated_softfloat_container_flags_preserve_unknown_original_abi(self):
         self.set_producer("\nfor p in report['programs']: p['generated_elf_abi_flags']=0x05000200")

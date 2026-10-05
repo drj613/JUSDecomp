@@ -277,6 +277,8 @@ def _recheck_baselines(record, build_dir, original, build_id, started_ns):
     if (record.get('status') != 'passed' or record['build_id'] != build_id or record['started_ns'] != started_ns
             or record['execution']['exit_status'] != 0):
         raise ValueError('ARM7 current build/execution provenance differs')
+    if _sha(original) != record['receipt']['parent_rom_sha256']:
+        raise ValueError('ARM7 original program identity differs from actual producer input')
     for name, pin in record['snapshot'].items():
         if _sha(_read(name, allow_symlink=name in record['tool_paths'])) != pin:
             raise ValueError('ARM7 live input/tool changed')
