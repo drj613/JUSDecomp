@@ -90,7 +90,7 @@ class SourceAccountingTests(unittest.TestCase):
                             '    1000    10000        c     1                 function\n')
         self.build = {'status': 'passed', 'units': [{
             'status': 'passed', 'module': 'ov000', 'object': 'src/trampoline.o',
-            'source': 'src/trampoline.c', 'functions': ['function', 'alias'],
+            'source': 'src/trampoline.c', 'functions': ['function', 'alias'], 'category': 'game',
             'compiled': {'path': str(self.compiled), 'sha256': digest(self.compiled)},
             'reference': {'path': str(self.reference), 'sha256': digest(self.reference)}}]}
         self.inputs = {'command': ['ld.lld', str(self.selected)], 'objects': [{
@@ -136,7 +136,7 @@ class SourceAccountingTests(unittest.TestCase):
         self.lcf = 'trampoline.o(.text)'
         self.assertEqual(self.ownership()['status'], 'passed')
 
-    def test_generated_stub_padding_stays_binary_fallback(self):
+    def test_generated_stub_padding_is_separate_from_typed_binary_fallback(self):
         path = self.config / 'overlays/ov009'
         path.mkdir()
         (path / 'delinks.txt').write_text(
@@ -144,7 +144,47 @@ class SourceAccountingTests(unittest.TestCase):
             '    .bss start:0x2020 end:0x2020 kind:bss align:32\n')
         coverage = self.tool().summarize_coverage(self.ownership(), self.config, verification_passed=True)
         self.assertEqual(coverage['arm9_initialized_bytes'], 104)
-        self.assertEqual(coverage['binary_fallback']['initialized_bytes'], 92)
+        self.assertEqual(coverage['binary_fallback']['initialized_bytes'], 60)
+        self.assertEqual(coverage['unknown']['layout_padding_or_generated_bytes'], 32)
+        self.assertEqual(coverage['matched_source_bytes']
+                         + coverage['binary_fallback']['initialized_bytes']
+                         + coverage['unknown']['layout_padding_or_generated_bytes'], 104)
+
+    def test_each_module_reports_source_and_fallback_without_cross_overlay_credit(self):
+        path = self.config / 'overlays/ov009'
+        path.mkdir()
+        (path / 'delinks.txt').write_text(
+            '    .ctor start:0x1000 end:0x1000 kind:rodata align:4\n'
+            '    .bss start:0x1020 end:0x1020 kind:bss align:32\n')
+        coverage = self.tool().summarize_coverage(self.ownership(), self.config, verification_passed=True)
+        modules = coverage['modules']
+        self.assertEqual(modules['OV000']['matched_source_bytes'], 12)
+        self.assertEqual(modules['OV000']['instructions']['matched_bytes'], 8)
+        self.assertEqual(modules['OV000']['literals']['matched_bytes'], 4)
+        self.assertEqual(modules['OV000']['functions'], {'matched': 1, 'total': 2})
+        self.assertEqual(modules['OV009']['matched_source_bytes'], 0)
+        self.assertEqual(modules['OV009']['binary_fallback']['initialized_bytes'], 0)
+        self.assertEqual(modules['OV009']['unknown']['layout_padding_or_generated_bytes'], 32)
+        self.assertEqual(sum(m['initialized_bytes'] for m in modules.values()), 104)
+
+    def test_game_category_is_distinct_from_instruction_and_literal_kind(self):
+        ownership = self.ownership()
+        self.assertEqual({i['implementation_category'] for i in ownership['accepted_intervals']}, {'game'})
+        self.assertEqual({f['implementation_category'] for f in ownership['functions']}, {'game'})
+        ownership['accepted_intervals'] *= 2
+        ownership['functions'] *= 2
+        coverage = self.tool().summarize_coverage(ownership, self.config, verification_passed=True)
+        categories = coverage['implementation_categories']
+        self.assertEqual(categories['game'], {'matched_source_bytes': 12, 'matched_functions': 1})
+        self.assertEqual(categories['sdk']['matched_source_bytes'], 0)
+        self.assertEqual(categories['unknown']['matched_source_bytes'], 0)
+        self.assertEqual(coverage['modules']['OV000']['implementation_categories'], categories)
+
+    def test_conflicting_implementation_categories_cannot_double_count_aliases(self):
+        ownership = self.ownership()
+        ownership['accepted_intervals'].append(dict(ownership['accepted_intervals'][0], implementation_category='sdk'))
+        with self.assertRaisesRegex(ValueError, 'conflict|overlap'):
+            self.tool().summarize_coverage(ownership, self.config, verification_passed=True)
 
     def test_map_owned_by_reference_cannot_earn_source_credit(self):
         self.remap(str(self.selected), str(self.reference))

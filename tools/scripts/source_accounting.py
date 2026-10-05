@@ -187,6 +187,7 @@ def verify_source_ownership(source_build, link_inputs, lcf, link_map_path, linke
         if not (set(ref_sections) == set(raw_sections) == set(chosen_sections) == set(nonempty)):
             raise ValueError('source allocated sections differ from authoritative TU sections')
         placements = {}
+        first_interval = len(accepted)
         for name, extent in nonempty.items():
             index, ref_section = ref_sections[name]
             _, raw_section = raw_sections[name]
@@ -216,6 +217,8 @@ def verify_source_ownership(source_build, link_inputs, lcf, link_map_path, linke
                 category = {'rodata': 'rodata', 'data': 'data', 'bss': 'bss'}.get(extent['kind'], 'unknown')
                 accepted.append({'module': region, 'section': name, 'start': extent['start'],
                                  'end': extent['end'], 'category': category})
+        for interval in accepted[first_interval:]:
+            interval['implementation_category'] = unit.get('category', 'unknown')
         ref_functions, raw_functions, chosen_functions = map(_functions, (ref, raw, chosen))
         if not (set(ref_functions) == set(raw_functions) == set(chosen_functions)):
             raise ValueError('source function inventory differs from reference TU')
@@ -247,7 +250,8 @@ def verify_source_ownership(source_build, link_inputs, lcf, link_map_path, linke
             if linked.section_name(linked.sections[candidate[5]]) != output_name:
                 raise ValueError('linked source function belongs to wrong module')
             functions.append({'module': region, 'name': name, 'start': expected_value & ~1,
-                              'end': (expected_value & ~1) + symbol[2], 'mode': mode})
+                              'end': (expected_value & ~1) + symbol[2], 'mode': mode,
+                              'implementation_category': unit.get('category', 'unknown')})
     return {'status': 'passed', 'accepted_intervals': accepted, 'functions': functions}
 
 
@@ -264,19 +268,35 @@ def _union_size(intervals):
     return total
 
 
+def _require_unambiguous_labels(groups):
+    for intervals in groups.values():
+        label_ends = {}
+        for start, end, label in sorted(intervals):
+            if any(previous_end > start for previous_label, previous_end in label_ends.items()
+                   if previous_label != label):
+                raise ValueError('conflicting coverage categories overlap')
+            label_ends[label] = max(end, label_ends.get(label, end))
+
+
 def summarize_coverage(ownership, config_dir, verification_passed=False):
     """Count unique extents; the caller must supply the completed gate result."""
     layout = _layout(config_dir)
     totals = defaultdict(int)
     initialized = 0
+    module_totals = {}
+    module_initialized = {}
     original_functions = set()
     for region, module in layout.items():
         base = min(extent['start'] for extent in module['sections'].values())
         bss = module['sections'].get('.bss')
         initialized_end = bss['start'] if bss else max(extent['end'] for extent in module['sections'].values())
-        initialized += initialized_end - base
+        module_initialized[region] = initialized_end - base
+        initialized += module_initialized[region]
+        module_totals[region] = defaultdict(int)
         for extent in module['sections'].values():
-            totals[extent['kind']] += extent['end'] - extent['start']
+            size = extent['end'] - extent['start']
+            totals[extent['kind']] += size
+            module_totals[region][extent['kind']] += size
         if module['symbols'].is_file():
             for match in re.finditer(r'\S+\s+kind:function\((arm|thumb),size=(0x[0-9a-fA-F]+)\)\s+addr:(0x[0-9a-fA-F]+)', module['symbols'].read_text()):
                 mode, size, address = match.groups()
@@ -285,6 +305,8 @@ def summarize_coverage(ownership, config_dir, verification_passed=False):
                     original_functions.add((region, address, address + size, mode))
     credited = verification_passed and ownership.get('status') == 'passed'
     grouped = defaultdict(list)
+    implementations = defaultdict(list)
+    implementation_labels = defaultdict(list)
     if credited:
         for item in ownership.get('accepted_intervals', []):
             module = layout[item['module']]
@@ -292,31 +314,77 @@ def summarize_coverage(ownership, config_dir, verification_passed=False):
             if not (extent['start'] <= item['start'] <= item['end'] <= extent['end']):
                 raise ValueError('credited source interval exceeds original module section')
             grouped[(item['module'], item['section'], item['category'])].append((item['start'], item['end']))
+            implementation = item.get('implementation_category', 'unknown')
+            if item['category'] != 'bss':
+                implementations[(item['module'], item['section'], implementation)].append((item['start'], item['end']))
+            implementation_labels[(item['module'], item['section'])].append((item['start'], item['end'], implementation))
     matched = defaultdict(int)
+    module_matched = defaultdict(lambda: defaultdict(int))
     classifications = defaultdict(list)
     for (module, section, category), intervals in grouped.items():
         classifications[(module, section)].extend((start, end, category) for start, end in intervals)
-    for intervals in classifications.values():
-        category_ends = {}
-        for start, end, category in sorted(intervals):
-            if any(previous_end > start for previous_category, previous_end in category_ends.items()
-                   if previous_category != category):
-                raise ValueError('conflicting coverage categories overlap')
-            category_ends[category] = max(end, category_ends.get(category, end))
-    for (_, _, category), intervals in grouped.items():
-        matched[category] += _union_size(intervals)
+    _require_unambiguous_labels(classifications)
+    _require_unambiguous_labels(implementation_labels)
+    for (module, _, category), intervals in grouped.items():
+        size = _union_size(intervals)
+        matched[category] += size
+        module_matched[module][category] += size
     functions = {(f['module'], f['start'], f['end'], 'arm' if f['mode'] == 'a' else 'thumb')
                  for f in ownership.get('functions', [])} if credited else set()
     if not functions <= original_functions:
         raise ValueError('credited source functions differ from original symbol inventory')
     declared_initialized = sum(size for kind, size in totals.items() if kind != 'bss')
     source_initialized = sum(size for category, size in matched.items() if category != 'bss')
-    if source_initialized > initialized or matched['bss'] > totals['bss']:
+    if source_initialized > declared_initialized or matched['bss'] > totals['bss']:
         raise ValueError('source coverage exceeds original module extents')
     function_intervals = defaultdict(list)
     for region, start, end, _ in original_functions:
         function_intervals[region].append((start, end))
     known_function_bytes = sum(_union_size(v) for v in function_intervals.values())
+    implementation_bytes = defaultdict(lambda: defaultdict(int))
+    implementation_functions = defaultdict(lambda: defaultdict(set))
+    for (module, _, category), intervals in implementations.items():
+        implementation_bytes[module][category] += _union_size(intervals)
+    if credited:
+        for function in ownership.get('functions', []):
+            implementation_functions[function['module']][function.get('implementation_category', 'unknown')].add(
+                (function['start'], function['end'], function['mode']))
+    categories = {'game', 'sdk', 'unknown'}
+    categories.update(category for values in implementation_bytes.values() for category in values)
+    categories.update(category for values in implementation_functions.values() for category in values)
+    modules = {}
+    for module, sizes in module_totals.items():
+        counts = module_matched[module]
+        source_bytes = sum(size for kind, size in counts.items() if kind != 'bss')
+        typed_bytes = sum(size for kind, size in sizes.items() if kind != 'bss')
+        if source_bytes > typed_bytes or counts['bss'] > sizes['bss']:
+            raise ValueError('source coverage exceeds original module extents')
+        modules[module] = {
+            'matched_source_bytes': source_bytes,
+            'initialized_bytes': module_initialized[module],
+            'initialized_percent': 100 * source_bytes / module_initialized[module] if module_initialized[module] else 0,
+            'functions': {'matched': sum(f[0] == module for f in functions),
+                          'total': sum(f[0] == module for f in original_functions)},
+            'instructions': {'matched_bytes': counts['instructions'], 'total_bytes': None},
+            'literals': {'matched_bytes': counts['literals'], 'total_bytes': None},
+            'code_sections': {'matched_bytes': counts['instructions'] + counts['literals'],
+                              'total_bytes': sizes['code']},
+            'rodata': {'matched_bytes': counts['rodata'], 'total_bytes': sizes['rodata']},
+            'data': {'matched_bytes': counts['data'], 'total_bytes': sizes['data']},
+            'bss': {'matched_bytes': counts['bss'], 'total_bytes': sizes['bss']},
+            'binary_fallback': {'initialized_bytes': typed_bytes - source_bytes,
+                                'bss_bytes': sizes['bss'] - counts['bss']},
+            'unknown': {'source_mapping_bytes': counts['unknown'],
+                        'layout_padding_or_generated_bytes': module_initialized[module] - typed_bytes,
+                        'code_outside_sized_functions_bytes': max(0, sizes['code'] - _union_size(function_intervals[module]))},
+            'implementation_categories': {
+                category: {'matched_source_bytes': implementation_bytes[module][category],
+                           'matched_functions': len(implementation_functions[module][category])}
+                for category in sorted(categories)}}
+    category_totals = {
+        category: {'matched_source_bytes': sum(m['implementation_categories'][category]['matched_source_bytes'] for m in modules.values()),
+                   'matched_functions': sum(m['implementation_categories'][category]['matched_functions'] for m in modules.values())}
+        for category in sorted(categories)}
     return {'status': 'credited' if credited else 'not_credited',
             'matched_source_bytes': source_initialized,
             'arm9_initialized_bytes': initialized,
@@ -331,11 +399,13 @@ def summarize_coverage(ownership, config_dir, verification_passed=False):
             'rodata': {'matched_bytes': matched['rodata'], 'total_bytes': totals['rodata']},
             'data': {'matched_bytes': matched['data'], 'total_bytes': totals['data']},
             'bss': {'matched_bytes': matched['bss'], 'total_bytes': totals['bss']},
-            'binary_fallback': {'initialized_bytes': initialized - source_initialized,
+            'binary_fallback': {'initialized_bytes': declared_initialized - source_initialized,
                                 'bss_bytes': totals['bss'] - matched['bss']},
             'unknown': {'source_mapping_bytes': matched['unknown'],
                         'layout_padding_or_generated_bytes': initialized - declared_initialized,
                         'code_outside_sized_functions_bytes': max(0, totals['code'] - known_function_bytes),
                         'instruction_literal_denominators': 'not inventoried for binary fallback',
                         'unbuilt_scopes': ['ARM7', 'embedded_executables'],
-                        'container_scan': 'proprietary containers not recursively classified'}}
+                        'container_scan': 'proprietary containers not recursively classified'},
+            'implementation_categories': category_totals,
+            'modules': modules}
