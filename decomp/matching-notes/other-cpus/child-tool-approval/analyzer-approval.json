@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "pending",
+  "status": "approved",
   "role": "strict child ARM9 analyzer; canonical parent production pin unchanged",
   "source_commit": "7b3513f05adc88a1cca8b0365d3a3607a50a1b25",
   "source_tree": "42448bc68cd596f36c3c56147988d28b36802ba4",
@@ -23,7 +23,8 @@
     "decomp/matching-notes/other-cpus/arm7-physical-baseline/verification.json": "1e2fe8554b6b784ffc915873fb474c8b5e7c51135fb5220f61d7112865704735",
     "decomp/matching-notes/other-cpus/arm7-physical-baseline/root-proof.json": "356420f5a7129cc7f16fcf5df93487477f12d8956fe22d19f99861c0a03ef2b5",
     "decomp/matching-notes/other-cpus/arm7-physical-baseline/README.md": "2346c247cbd82885ccc22ddd68aeccd30946ba04a3cc6158eebd0c4cf45863b5",
-    "decomp/matching-notes/other-cpus/arm7-physical-baseline/accepted-review.json": "93f1d25741ce1e6e38f3dfb2c3534edcdc636565a5a5fbc4794d7333b2b7404c"
+    "decomp/matching-notes/other-cpus/arm7-physical-baseline/accepted-review.json": "93f1d25741ce1e6e38f3dfb2c3534edcdc636565a5a5fbc4794d7333b2b7404c",
+    "decomp/matching-notes/other-cpus/child-tool-approval/accepted-review.json": "c4dfc67b06b947f598461cc50edc7b0b6aa248205a8f29efbd31baa0b909817f"
   },
   "source_bytes": 0,
   "T10_complete": false

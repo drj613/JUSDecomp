@@ -44,6 +44,10 @@ invented compress/decompress fixture. The original codec proof remains separate
 historical evidence. This new identity removes dependence on that proof's
 subsequently edited local source checkout.
 
-Both approval manifests remain pending until independent source/build review.
+Independent gpt-6.1-sol review of `4e9f6b7` reports No flags. A separate
+clean build reproduces the root binary exactly; pre/post-build source audits
+match all 113 local files and 116 registry packages. Both role manifests are
+approved. `accepted-review.json` binds the independent evidence. The pending
+status in `root-build.json` records its state before that review.
 Tool approval supplies no native-link, canonical pipeline, source-function or
 T10 completion claim. Child source credit remains zero.
