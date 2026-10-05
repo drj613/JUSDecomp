@@ -27,6 +27,7 @@ class Elf32:
             raise ValueError('unsupported ELF section header size')
         self.sections = [list(struct.unpack_from('<10I', data, self.sh_offset + i * 40))
                          for i in range(count)]
+        self.names_index = names_index
         self.names = self.content(self.sections[names_index])
         self.sym_index = next(i for i, s in enumerate(self.sections) if s[1] == 2)
         self.strings = self.content(self.sections[self.sections[self.sym_index][6]])
@@ -184,6 +185,32 @@ def emit_modules(elf_data, modules, directory):
     return results
 
 
+def dsd_check_view(data, modules):
+    """Make a diagnostic MW-metadata view; never use this as native link input.
+
+    dsd 0.12 recognizes uppercase module sections and expects even Thumb function
+    addresses. Keep the canonical native ELF separately for ARM EABI consumers.
+    """
+    elf = Elf32(data)
+    out = bytearray(data)
+    renames = {module['section']: module['region'] for module in modules}
+    names_offset = elf.sections[elf.names_index][4]
+    for section in elf.sections:
+        old = elf.section_name(section)
+        if old not in renames:
+            continue
+        new = renames[old].encode('ascii')
+        if len(new) > len(old):
+            raise ValueError('dsd module name cannot grow in metadata view')
+        offset = names_offset + section[0]
+        out[offset:offset + len(old) + 1] = new + bytes(len(old) + 1 - len(new))
+    sym_offset = elf.sections[elf.sym_index][4]
+    for index, symbol in enumerate(elf.symbols()):
+        if symbol[3] & 15 == 2 and symbol[5] != 0:
+            struct.pack_into('<I', out, sym_offset + index * 16 + 4, symbol[1] & ~1)
+    return bytes(out)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--lcf', type=Path, required=True)
@@ -211,7 +238,9 @@ def main():
     result = subprocess.run(command, capture_output=True, text=True)
     (args.output / 'link.log').write_text(result.stdout + result.stderr)
     result.check_returncode()
-    results = emit_modules(linked.read_bytes(), modules, args.output)
+    linked_data = linked.read_bytes()
+    results = emit_modules(linked_data, modules, args.output)
+    (args.output / 'dsd-check.elf').write_bytes(dsd_check_view(linked_data, modules))
     (args.output / 'modules.json').write_text(json.dumps(results, indent=2) + '\n')
 
 

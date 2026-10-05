@@ -108,7 +108,7 @@ SECTIONS {
  OV001 : ORIGIN = AFTER(ARM9) > build/ov1.bin
 }
 SECTIONS {
- .arm9 : { ALIGNALL(4); a.o(.text) a.o(.data) . = ALIGN(16); ARM9_BSS_START = .; . += 32; ARM9_BSS_END = .; } > ARM9
+ .arm9 : { ALIGNALL(4); ARM9_TEXT_START = .; a.o(.text) a.o(.data) . = ALIGN(16); ARM9_BSS_START = .; . += 32; ARM9_BSS_END = .; } > ARM9
  .ov000 : { ALIGNALL(4); WRITEW(0x11111111); OV000_BSS_START = .; } > OV000
  .ov001 : { ALIGNALL(4); WRITEW(0x22222222); OV001_BSS_START = .; } > OV001
 }
@@ -127,6 +127,41 @@ SECTIONS {
             self.assertEqual((root / 'out/ov1.bin').read_bytes(), bytes.fromhex('22222222'))
             modules = json.loads((root / 'out/modules.json').read_text())
             self.assertEqual(modules[1]['address'], 0x02000030)
+            raw = module().Elf32((root / 'out/linked.elf').read_bytes())
+            view = module().Elf32((root / 'out/dsd-check.elf').read_bytes())
+            self.assertIn('.arm9', [raw.section_name(s) for s in raw.sections])
+            self.assertIn('ARM9', [view.section_name(s) for s in view.sections])
+            raw_function = next(s for s in raw.symbols() if raw.symbol_name(s) == 'thumb_func')
+            view_function = next(s for s in view.symbols() if view.symbol_name(s) == 'thumb_func')
+            self.assertEqual(raw_function[1], 0x02000001)
+            self.assertEqual(view_function[1], 0x02000000)
+
+    def test_dsd_check_view_changes_only_known_names_and_function_mode_bits(self):
+        tool = module()
+        self.assertTrue(hasattr(tool, 'dsd_check_view'), 'dsd diagnostic view missing')
+        native = bytearray(tool.normalize_object(fixture()))
+        elf = tool.Elf32(native)
+        names_section = elf.sections[6]
+        native[names_section[4] + 1:names_section[4] + 6] = b'.arm9'
+        # Add an odd data address: this must survive the function-only mode edit.
+        symtab = elf.sections[3]
+        struct.pack_into('<IIIBBH', native, symtab[4] + 16, 0, 5, 4, 1, 0, 2)
+        original = bytes(native)
+        view = tool.dsd_check_view(original, [{'section': '.arm9', 'region': 'ARM9'}])
+        raw_elf, view_elf = tool.Elf32(original), tool.Elf32(view)
+        self.assertEqual(raw_elf.section_name(raw_elf.sections[1]), '.arm9')
+        self.assertEqual(view_elf.section_name(view_elf.sections[1]), 'ARM9')
+        self.assertEqual(raw_elf.symbols()[3][1], 1)
+        self.assertEqual(view_elf.symbols()[3][1], 0)
+        self.assertEqual(view_elf.symbols()[1][1], 5)
+        self.assertEqual(raw_elf.sections, view_elf.sections)
+        for index in (1, 2, 4, 5, 7):
+            self.assertEqual(raw_elf.content(raw_elf.sections[index]),
+                             view_elf.content(view_elf.sections[index]))
+        changed = {i for i, (a, b) in enumerate(zip(original, view)) if a != b}
+        allowed = set(range(names_section[4] + 1, names_section[4] + 7))
+        allowed.add(symtab[4] + 3 * 16 + 4)
+        self.assertTrue(changed <= allowed)
 
     def test_rejects_unknown_mw_directive(self):
         with self.assertRaisesRegex(ValueError, 'unsupported'):
