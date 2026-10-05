@@ -262,3 +262,10 @@ Indirect destinations, return behavior, code/data partitions, original function
 boundaries, and original relocations remain open. This contract grants zero ARM7
 source credit and does not complete T10. The accepted physical baseline and all
 16 files pinned by its approval remain unchanged.
+
+Root independently replays the same pinned observer and span manifest, obtains
+the identical complete observation digest, and checks both programs' original
+words, literal and signed branch destination. Native LLVM independently decodes
+the new twelve bytes. Metadata is retained in
+[arm7-reachable-grounding-proof](arm7-reachable-grounding-proof/root-proof.json).
+This settles the bounded observation; it grants no function or source credit.
