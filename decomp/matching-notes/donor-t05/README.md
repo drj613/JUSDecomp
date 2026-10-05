@@ -122,3 +122,7 @@ headers or guessed dependencies are accepted. Public invented fixtures cover
 mode conflicts, altered destinations/addends, literal pools, data as code,
 tiny collisions, ambiguous overlays, unlicensed inputs, source/header mutation,
 BL/BLX preservation and duplicate `.text` sections with distinct RELA `sh_info`.
+
+Root repeated the final search after the invalid Thumb BLX regression fix at
+`dd8a4fd`. `source-report.json` records the fresh 19-stage exact JUS ROM proof;
+`tests.log` records 174 passing tests without skips. Counts remain unchanged.

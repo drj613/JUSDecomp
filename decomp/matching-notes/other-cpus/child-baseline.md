@@ -63,3 +63,13 @@ The producer also checked live linker argv, scripts and selected objects through
 The child main extraction clears `compressed_static_end`. Its raw linked SHA256 is `50598daa262a3e1f174b46b76fc24024a020f562e55a00318a674c116290452d`. Restoring only the original word from pinned metadata yields the original expanded main hash. `other_executables.verify_extracted_arm9_modules` enforces this comparison and rejects other byte changes.
 
 The analyzer emits 7,174 main function records and ten ITCM records. Thirteen main records overlap earlier function extents, including BIOS return tails. These are generated records, not a verified count of original source functions. Every source-function count remains zero, and the remaining original function boundaries remain unresolved.
+
+Root independently applied and built the published patch, obtaining the same
+native tool hash. `dsd-child-swi-root-report.json` and its test log record strict
+child initialization and all five Rust tests. `child-arm9-root-baseline.json`
+records independently emitted image, symbol and relocation checks.
+The candidate tool also passes strict parent initialization and the existing
+19-stage exact parent ROM reconstruction. `patched-parent-strict-init.json`,
+`patched-parent-source-report.json` and `patched-parent-toolchain.lock.json`
+record these isolated compatibility checks. The temporary lock pins the repaired
+source commit; the production lock still uses the original release tool.
