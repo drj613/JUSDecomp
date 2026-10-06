@@ -118,7 +118,8 @@
     "tools/scripts/rom_roundtrip.py": "a09e8d2a049c1bfa217dba311fd6ad4ebca5ab01a8bf411daa854ac7009439c4",
     "tools/scripts/source_accounting.py": "9430deaf83c336f7f0ccf9242ede8f1657a2164599bbd2f852bf1527f4d10ef7",
     "tools/scripts/source_build.py": "9e62de2961c3746a09505f3188204fcab29a818b1e1e645ae1bc44f858aeb625",
-    "tools/scripts/verify.py": "d6d91117bb3a3e4a163c153c797b5ba89d37308fc866228de9394e3c5d0a1f90"
+    "tools/scripts/verify.py": "d6d91117bb3a3e4a163c153c797b5ba89d37308fc866228de9394e3c5d0a1f90",
+    ".gitattributes": "93b8e1ad54f01413492d35ccc8295ccda5fa131a8eab9ba4124f69df2f047745"
   },
   "external_tools": {
     "parent_dsd": {
@@ -231,5 +232,6 @@
     "sha256": "a9c9bf89e6d99548b7c87e822b217c3fb74ef25186535b06193a6fb73d0d6d27"
   },
   "actual_generated_artifacts_are_fresh_outputs_not_repository_inputs": true,
-  "canonical_approved_dependency_count": 28
+  "canonical_approved_dependency_count": 28,
+  "repository_checkout_provenance": "checkout-eol.json"
 }

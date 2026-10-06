@@ -198,4 +198,33 @@ class LiveControls(unittest.TestCase):
         finally: path.write_bytes(data); os.utime(path,ns=(stamp,stamp))
 
 
+class CheckoutPins(unittest.TestCase):
+    def test_declared_checkout_bytes_match_git_blobs(self):
+        root=HERE.parents[3]; owner=HERE/'checkout-eol.json'
+        self.assertTrue(owner.is_file(),'the47 consumed CRLF inputs require explicit Git-blob provenance')
+        import hashlib
+        sha=lambda data:hashlib.sha256(data).hexdigest()
+        proof=json.loads(owner.read_text()); catalog=json.loads((HERE/'dependency-catalog.json').read_text())
+        self.assertEqual(sha((root/'.gitattributes').read_bytes()),proof['gitattributes_sha256'])
+        self.assertEqual(sha(subprocess.check_output(['git','show','HEAD:.gitattributes'],cwd=root)),proof['gitattributes_sha256'])
+        rows=proof['inputs'];self.assertEqual(len(rows),47)
+        differing=set()
+        for name,pin in catalog['repository_sha256'].items():
+            working=(root/name).read_bytes(); blob=subprocess.check_output(['git','show','HEAD:'+name],cwd=root)
+            self.assertEqual(sha(working),pin)
+            if sha(blob)!=pin:differing.add(name)
+        self.assertEqual(differing,{row['path'] for row in rows})
+        for row in rows:
+            with self.subTest(path=row['path']):
+                blob=subprocess.check_output(['git','show','HEAD:'+row['path']],cwd=root)
+                working=(root/row['path']).read_bytes()
+                attrs=subprocess.check_output(['git','check-attr','-z','text','eol','--',row['path']],cwd=root).decode().split('\0')
+                self.assertEqual({attrs[i+1]:attrs[i+2] for i in range(0,len(attrs)-1,3)}, {'text':'set','eol':'crlf'})
+                self.assertEqual(sha(blob),row['committed_blob_sha256'])
+                self.assertEqual(sha(working),row['consumed_checkout_sha256'])
+                self.assertEqual(catalog['repository_sha256'][row['path']],row['consumed_checkout_sha256'])
+                self.assertNotIn(b'\r',blob)
+                self.assertEqual(blob.replace(b'\n',b'\r\n'),working)
+
+
 if __name__ == '__main__': unittest.main()

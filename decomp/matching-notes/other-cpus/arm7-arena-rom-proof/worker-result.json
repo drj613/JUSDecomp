@@ -1,8 +1,8 @@
 {
   "status": "worker_verified_pending_independent_acceptance",
-  "private_replay_receipt": "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial-proof.json",
-  "actual_receipt_sha256": "751a2548f8c8da08c67dcd01e7794425874e8da33a1dafeaf9f515ba42a7a580",
-  "build_id": "2b0d2f23-f958-44d3-ba36-9c71a3b511e4",
+  "private_replay_receipt": "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial-proof.json",
+  "actual_receipt_sha256": "237a798df8142cd561defb526fd75bd0a58a65cfd2c3fa93b26d975a45c74a54",
+  "build_id": "07952436-1e65-4182-aa99-aba7d8cb307e",
   "rom": {
     "sha1": "ba58e20ee60eb81c33dcd4934a21271baa9f954a",
     "sha256": "a9c9bf89e6d99548b7c87e822b217c3fb74ef25186535b06193a6fb73d0d6d27",
@@ -17,11 +17,11 @@
   "t10_complete": false,
   "artifact_count": 916,
   "trial_artifact_count": 198,
-  "input_snapshot_count": 151,
-  "repository_input_count": 118,
+  "input_snapshot_count": 153,
+  "repository_input_count": 119,
   "distinct_external_tool_paths": 18,
   "parent_outputs": {
-    "report.json": "72537c2457dcbfbd174355b256f4df6f57db6cfb9971113b65074182d0d38c96",
+    "report.json": "ef45bebecef2f574d54dede8d7efc46814953f2cd07524a7d12817c541ca357b",
     "rebuilt.nds": "a9c9bf89e6d99548b7c87e822b217c3fb74ef25186535b06193a6fb73d0d6d27"
   },
   "module_checkpoint_stages": [
@@ -50,50 +50,50 @@
       "name": "parent_verification",
       "status": "passed",
       "exit_status": 0,
-      "started_ns": 1791245909278663000,
-      "finished_ns": 1791245914870793000
+      "started_ns": 1791246418099255000,
+      "finished_ns": 1791246424215560000
     },
     {
       "name": "arm7_native_baselines",
       "status": "passed",
       "exit_status": 0,
-      "started_ns": 1791245914896751000,
-      "finished_ns": 1791245916164720000
+      "started_ns": 1791246424239613000,
+      "finished_ns": 1791246425525185000
     },
     {
       "name": "child_arm9_native_roundtrip",
       "status": "passed",
       "exit_status": 0,
-      "started_ns": 1791245916164723000,
-      "finished_ns": 1791245924090599000
+      "started_ns": 1791246425525190000,
+      "finished_ns": 1791246436388468000
     },
     {
       "name": "research_trial",
       "status": "passed",
       "exit_status": 0,
-      "started_ns": 1791245924090795000,
-      "finished_ns": 1791245926898253000
+      "started_ns": 1791246436388915000,
+      "finished_ns": 1791246438898440000
     },
     {
       "name": "integrated_input_gate",
       "status": "passed",
       "exit_status": 0,
-      "started_ns": 1791245926898257000,
-      "finished_ns": 1791245930717088000
+      "started_ns": 1791246438898443000,
+      "finished_ns": 1791246443549449000
     },
     {
       "name": "research_pack",
       "status": "passed",
       "exit_status": 0,
-      "started_ns": 1791245930718254000,
-      "finished_ns": 1791245943621385000
+      "started_ns": 1791246443553571000,
+      "finished_ns": 1791246459662596000
     },
     {
       "name": "final_freshness",
       "status": "passed",
       "exit_status": 0,
-      "started_ns": 1791245943621387000,
-      "finished_ns": 1791245947664053000
+      "started_ns": 1791246459662598000,
+      "finished_ns": 1791246465116928000
     }
   ],
   "research_pack": {
@@ -312,7 +312,7 @@
           "processor": "arm946e",
           "isa": "armv5te"
         },
-        "input_file": "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/parent/child-arm9/rebuilt.srl",
+        "input_file": "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/parent/child-arm9/rebuilt.srl",
         "rom_offset": 2357248,
         "size_bytes": 1955956,
         "sha256": "af35ea24071b08f50eef9d28cf5ed4686b0110679b5389ac43ce8254d6e13fc7",
@@ -1281,9 +1281,9 @@
               "-nostdinc",
               "-O4,s",
               "-c",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/low_store_trial.c",
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/low_store_trial.c",
               "-o",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/lower_store.o"
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/lower_store.o"
             ],
             "returncode": 0,
             "stdout": "",
@@ -1443,9 +1443,9 @@
               "-nostdinc",
               "-O4,p",
               "-c",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/store_trial.c",
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/store_trial.c",
               "-o",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/upper_store.o"
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/upper_store.o"
             ],
             "returncode": 0,
             "stdout": "",
@@ -1605,9 +1605,9 @@
               "-nostdinc",
               "-O4,s",
               "-c",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/low_getter_trial.c",
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/low_getter_trial.c",
               "-o",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/lower_getter.o"
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/lower_getter.o"
             ],
             "returncode": 0,
             "stdout": "",
@@ -1830,9 +1830,9 @@
               "-nostdinc",
               "-O4,s",
               "-c",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/high_getter_trial.c",
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/high_getter_trial.c",
               "-o",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/upper_getter.o"
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/upper_getter.o"
             ],
             "returncode": 0,
             "stdout": "",
@@ -2071,9 +2071,9 @@
               "-nostdinc",
               "-O4,s",
               "-c",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/low_load_trial.c",
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/low_load_trial.c",
               "-o",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/lower_load.o"
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/lower_load.o"
             ],
             "returncode": 0,
             "stdout": "",
@@ -2233,9 +2233,9 @@
               "-nostdinc",
               "-O4,s",
               "-c",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/high_load_trial.c",
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/high_load_trial.c",
               "-o",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/upper_load.o"
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/upper_load.o"
             ],
             "returncode": 0,
             "stdout": "",
@@ -2395,9 +2395,9 @@
               "-nostdinc",
               "-O4,s",
               "-c",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/arena_init_trial.c",
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/arena_init_trial.c",
               "-o",
-              "/private/tmp/jus-arm7-arena-rom-worker-proof/frozen-tests/public-replay/trial/initializer.o"
+              "/private/tmp/jus-arm7-arena-rom-worker-proof/eol-fresh-replay/trial/initializer.o"
             ],
             "returncode": 0,
             "stdout": "",
@@ -2748,8 +2748,8 @@
         }
       ]
     },
-    "started_ns": 1791245930718326000,
-    "finished_ns": 1791245943621374000
+    "started_ns": 1791246443553681000,
+    "finished_ns": 1791246459662584000
   },
   "tests": {
     "count": 11,
@@ -2770,5 +2770,18 @@
   },
   "replay_reads_saved_worker_result": false,
   "binaries_and_original_ROM_published": false,
-  "canonical_code_approvals_and_old_capsules_modified": false
+  "canonical_code_approvals_and_old_capsules_modified": false,
+  "checkout_provenance": {
+    "status": "passed",
+    "converted_inputs": 47,
+    "repository_inputs": 119,
+    "attributes_modified": false,
+    "canonical_input_bytes_modified": false,
+    "readback": "checkout-eol.json",
+    "focused_test_count": 1,
+    "seconds": 1.513,
+    "red_log": "red-checkout-eol.log",
+    "green_log": "green-checkout-eol.log",
+    "original_gate_failure_commit": "bbfae51c3f1843d1d3d79bf95284325e5ba99bf4"
+  }
 }
