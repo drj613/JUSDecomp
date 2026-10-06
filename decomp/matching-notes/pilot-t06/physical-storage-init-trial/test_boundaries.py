@@ -1,0 +1,58 @@
+"""Real file controls for finite pin, output and publication boundaries."""
+import importlib.util
+import tempfile
+import unittest
+from unittest.mock import patch
+from pathlib import Path
+P = Path(__file__).with_name('replay.py')
+spec = importlib.util.spec_from_file_location('replay_boundaries', P)
+r = importlib.util.module_from_spec(spec); spec.loader.exec_module(r)
+class BoundaryTests(unittest.TestCase):
+    def test_source_and_tool_pin_changes_reject(self):
+        with tempfile.TemporaryDirectory() as d:
+            for name in ('source.c', 'compiler.exe'):
+                p = Path(d)/name; p.write_bytes(b'original'); expected = {str(p): r.digest(p)}
+                p.write_bytes(b'changed')
+                with self.assertRaises(ValueError):
+                    getattr(r, 'check_snapshot', lambda values: None)(expected)
+    def test_existing_output_rejects_without_changes(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d)/'output'; p.mkdir(); marker=p/'marker'; marker.write_bytes(b'keep')
+            with self.assertRaises(ValueError):
+                getattr(r, 'fresh_output', lambda path: path.mkdir(exist_ok=True))(p)
+            self.assertEqual(marker.read_bytes(), b'keep')
+    def test_receipt_creation_is_exclusive(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/'receipt.json'; p.write_bytes(b'keep')
+            with self.assertRaises(FileExistsError):
+                getattr(r, 'publish_receipt', lambda path, payload, snap: path.write_bytes(payload))(p,b'new',{})
+            self.assertEqual(p.read_bytes(),b'keep')
+    def test_postpublication_checks_actual_changed_input(self):
+        with tempfile.TemporaryDirectory() as d:
+            source=Path(d)/'source.c'; source.write_bytes(b'original'); expected={str(source):r.digest(source)}
+            source.write_bytes(b'changed'); receipt=Path(d)/'receipt.json'
+            with self.assertRaises(ValueError):
+                getattr(r,'publish_receipt',lambda path,payload,snap:path.write_bytes(payload))(receipt,b'new',expected)
+            self.assertFalse(receipt.exists())
+    def test_actual_mutation_after_receipt_write_rejects(self):
+        with tempfile.TemporaryDirectory() as d:
+            source=Path(d)/'source.c'; source.write_bytes(b'original')
+            expected={str(source):r.digest(source)}; receipt=Path(d)/'receipt.json'
+            real_check=r.check_snapshot
+            def mutate_after_write(snapshot):
+                self.assertEqual(receipt.read_bytes(),b'new')
+                source.write_bytes(b'late changed')
+                real_check(snapshot)
+            with patch.object(r,'check_snapshot',mutate_after_write):
+                with self.assertRaises(ValueError): r.publish_receipt(receipt,b'new',expected)
+            self.assertFalse(receipt.exists())
+    def test_actual_receipt_mutation_after_write_rejects(self):
+        with tempfile.TemporaryDirectory() as d:
+            receipt=Path(d)/'receipt.json'
+            def mutate_after_write(snapshot):
+                self.assertEqual(receipt.read_bytes(),b'new')
+                receipt.write_bytes(b'late changed')
+            with patch.object(r,'check_snapshot',mutate_after_write):
+                with self.assertRaises(ValueError): r.publish_receipt(receipt,b'new',{})
+            self.assertFalse(receipt.exists())
+if __name__=='__main__': unittest.main()
