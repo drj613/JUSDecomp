@@ -1,6 +1,9 @@
 """Real file controls for finite pin, output and publication boundaries."""
 import importlib.util
 import tempfile
+import os
+import subprocess
+import sys
 import unittest
 from unittest.mock import patch
 from pathlib import Path
@@ -84,4 +87,18 @@ class BoundaryTests(unittest.TestCase):
                 with self.assertRaises(ValueError): r.publish_receipt(receipt,b'new',snapshot)
             self.assertFalse(receipt.exists()); self.assertFalse(receipt.is_symlink())
             self.assertEqual(external.read_bytes(),b'compiled')
+    def test_cli_broken_output_symlink_rejects_before_target_creation(self):
+        with tempfile.TemporaryDirectory() as d:
+            target=Path(d)/'unexpected-target'; output=Path(d)/'output-link'
+            output.symlink_to(target)
+            # A genuine Git config error stops the old entry point before any compiler.
+            # The fixed entry point must reject at fresh_output before Git is called.
+            environment=dict(os.environ, GIT_CONFIG_COUNT='1', GIT_CONFIG_KEY_0='invalid', GIT_CONFIG_VALUE_0='x')
+            result=subprocess.run([sys.executable,str(P),'--output',str(output)],env=environment,capture_output=True,text=True)
+            print({'actual_cli_returncode':result.returncode,'stderr':result.stderr,
+                   'symlink_target_created':target.exists(),'verify_created':(target/'verify').exists()})
+            self.assertEqual(result.returncode,1)
+            self.assertFalse(target.exists())
+            self.assertTrue(output.is_symlink())
+            self.assertIn('output already exists; supply a fresh directory',result.stderr)
 if __name__=='__main__': unittest.main()

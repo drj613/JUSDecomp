@@ -316,7 +316,7 @@ if __name__ == '__main__':
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args()
     try:
-        receipt = replay(args.output.resolve())
+        receipt = replay(args.output.absolute())
         status = json.loads(receipt.read_text())['status']
         print(json.dumps({'status': status, 'receipt': str(receipt)}))
         raise SystemExit(0 if status in ('exact_research_match', 'measured_rejection') else 1)
