@@ -2,7 +2,7 @@
 
 Stopped at the owner's request before design or implementation. Start with `br show jus-bjry.39`. This is a partial grounding checkpoint, not a source trial result or compiler release.
 
-Read `scope.txt`, then `grounding.md` for the traced build and receipt flow. That writer note was captured before the independent original-selection experiment finished; its statements that selected44 was unrun describe that earlier pass. `independent-grounding.json` records the later genuine original-only split. No target C body or compiler was used.
+Read `scope.md`, then `grounding.md` for the traced build and receipt flow. That writer note was captured before the independent original-selection experiment finished; its statements that selected44 was unrun describe that earlier pass. `independent-grounding.json` records the later genuine original-only split. No target C body or compiler was used.
 
 The fresh selected original ELF is `8065e478fcf8b98a3f590db0df6904a8c4b97671dd35d068306b8082d281c50e`, with one ARM function, sole allocated44-byte text and no RELA. Raw44 matches accepted38. Candidate LCF selects it once; all62 original incoming branches preserve their targets and42 region-qualified owners. Root read the actual selected object and reran unchanged strict self-comparison successfully. This positive is original-copy evidence, not compiled-source acceptance.
 
