@@ -45,7 +45,7 @@ The eight main catalog caller functions and the 21 mixed query references remain
 | main `0207a52c` | `0207a534` | Incoming `r0/r1/r2`; no allocation here. Final table `020979e8`. |
 | ov012 `021b0660` | `021b06a2`, `021b0742` | First allocates 20 bytes through `0201a21c`, guards zero and saves the pointer in parent `+20`. Second allocates 104 bytes, guards zero, builds the embedded records, then passes the retained pointer to manager virtual `+3c`. Exact ov012 key and label literals are in JSON. |
 | ov012 `021b0860` | `021b0868` | Incoming `r0/r1/r2`; no allocation here. Final table `02099c4c`. |
-| ov012 `021b08ac` | `021b08b4` | Incoming `r0/r1/r2`; no allocation here. Final table `020985b8`. Its observed enclosing wrapper also calls it for embedded storage. |
+| ov012 `021b08ac` | `021b08b4` | Incoming `r0/r1/r2`; no allocation here. Final table `020985b8`. Its observed wrapper `021b0880` forwards incoming storage unchanged. |
 
 Every simple forwarding wrapper retains storage in `r4`, overwrites `+0` after the call, and returns that retained storage. Their local code establishes no allocation provenance or ownership. The JSON records full original extents and hashes, including caller literal pools, rather than treating catalog code-only sizes as complete ELF extents.
 
@@ -65,6 +65,8 @@ python3 decomp/matching-notes/pilot-t06/constructor-storage-contract/check_origi
 The replay verifies the source and tool pins before creating output. It reuses unchanged `verify.prepare_config` and `verify.expected_modules` to copy and prepare original metadata, strips source selections as that existing helper prescribes, runs only DSD extraction and original delinking, and reads ELF through unchanged `native_link.Elf32`. No compiler or linker runs. It compares fresh main and ov012 extraction with direct original ROM slices, all researched full function payloads, all four outgoing constructor relocations, all 13 incoming relocations, both helper call destinations, the 21 constructor instruction words, and both literal values. It also binds every one of the 15 original objects by inventory digest. The output contains DSD logs and `readback.json`.
 
 The author's fresh replay passed with 15 original objects, 13 direct sites and 11 caller functions. The root independently extracted and delinked the ROM, read the 92-byte extent and four outgoing records, and decoded every main and ov012 call from actual original bytes. Saved Atlas state and findings were consulted first and contained no finding for `0202c4ac`; those historical observations are discovery aids, not runtime inputs to the replay.
+
+The first committed checker at `5e9c3cb` incorrectly allowed optimized Python to run with its assertion gates disabled. The corrected checker rejects `-O` and `-OO` before imports or output creation. [integrity-controls.json](integrity-controls.json) preserves the original false-pass readback and records both optimized invocations exiting 1 without creating their output directories, followed by a fresh normal replay passing all gates. Its finite helper closure is unchanged. `verify.py` and `native_link.py` import only standard-library modules at module scope; `verify.load_script` is never called by the two preparation helpers used here. The existing 56 input pins therefore cover all consumed repository dependencies. Python and its standard library remain explicit external runtime inputs.
 
 ## Remaining gate
 

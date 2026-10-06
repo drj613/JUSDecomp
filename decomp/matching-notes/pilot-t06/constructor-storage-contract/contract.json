@@ -541,7 +541,7 @@
       "call_sites": [
         "0x021b08b4"
       ],
-      "storage": "Incoming r0 saved r4; no allocation/null guard here. Wrapper 021b0880 forwards subobject storage while setting r2=r1.",
+      "storage": "Incoming r0 saved r4; no allocation/null guard here. Wrapper 021b0880 forwards incoming storage unchanged while setting r2=r1.",
       "key": "Incoming r1 unchanged.",
       "label": "Incoming r2 unchanged.",
       "after_call": "Overwrite vptr 020985b8; return storage."

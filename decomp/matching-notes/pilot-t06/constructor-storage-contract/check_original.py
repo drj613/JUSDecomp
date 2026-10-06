@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """Fresh original-ROM readback for this bounded constructor contract."""
+if not __debug__:
+    raise SystemExit('Optimized Python disables verification assertions; run without -O or -OO.')
+
 import argparse
 import hashlib
 import json
