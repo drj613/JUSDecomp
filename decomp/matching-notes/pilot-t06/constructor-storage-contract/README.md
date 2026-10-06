@@ -71,3 +71,14 @@ The first committed checker at `5e9c3cb` incorrectly allowed optimized Python to
 ## Remaining gate
 
 This contract supports preallocated storage and a key plus optional label at the machine boundary. It does not identify the original C++ class, mangled constructor binding, ownership, or allocator failure policy. The caller's zero guard supplies no throwing or nothrow guarantee. No new evidence releases another compiler trial. The next safe action is to record a bounded source design that explicitly resolves or excludes those unresolved bindings, and obtain the separate trial release before implementing it. T06 stays open.
+
+## Acceptance evidence
+
+Fresh root and independent replays passed. Root raw ELF and ROM readers and the independent execution trace are retained beside the contract. The accepted package has 26 strict published artifact pins. All 56 runtime repository pins also match the existing 119-input catalog. Nine have identical Git and working bytes; 47 are the existing LF blobs consumed as CRLF under unchanged attributes. The earlier owned conversion record remains unchanged and is pinned by this acceptance.
+
+After committing, verify published pins and the existing checkout-byte relation:
+
+```sh
+python3 decomp/matching-notes/verify-evidence-pins.py decomp/matching-notes/pilot-t06/constructor-storage-contract/acceptance.json
+ROM_TRIAL_TEST_ROOT=/private/tmp/UNUSED_CONSTRUCTOR_READBACK PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s decomp/matching-notes/other-cpus/arm7-arena-rom-proof -p 'test_*.py' -k test_declared_checkout -v
+```
