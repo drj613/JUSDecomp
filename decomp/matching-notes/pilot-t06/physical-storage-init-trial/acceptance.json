@@ -48,7 +48,7 @@
     "decomp/arm9/overlays/ov013/symbols.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "decomp/matching-notes/baseline-t01/executable-regions.json": "6d4d7f88e5edd14c07c449331f6c96dd2597b4d98f8377f253945585f9823610",
     "decomp/matching-notes/baseline-t01/reference-relocations.json": "f1c1012bcc33fd810a7b5f807ffda4b737f94e21e3d72be784f2e7fc68365844",
-    "decomp/matching-notes/decisions.tsv": "3590884d0556e5c409ed3855f644fda905facd3e79b240d4884b0a334dba4a0b",
+    "decomp/matching-notes/decisions.tsv": "1b8cbad6c9db09ab80e4a953514c1af47d83f199102018de99ff83408b9a0b1b",
     "decomp/matching-notes/other-cpus/arm7-arena-rom-proof/checkout-eol.json": "0bbbc6b52c63eeb16d08e08725d31c72c2cd9922514a0ae1d74d05a3c96a8cb7",
     "decomp/matching-notes/other-cpus/arm7-arena-rom-proof/dependency-catalog.json": "3678ea59396a1ab6b932461750c7ec9afb334ecd19a8ab94a8b3a107a1334781",
     "decomp/matching-notes/pilot-t06/physical-storage-init-trial/README.md": "aacaa5234b0ec3a06e094be99e1f439924501160b9552629904b5185fefac9fb",
@@ -105,6 +105,8 @@
     "tools/scripts/rom_roundtrip.py": "a09e8d2a049c1bfa217dba311fd6ad4ebca5ab01a8bf411daa854ac7009439c4",
     "tools/scripts/source_accounting.py": "9430deaf83c336f7f0ccf9242ede8f1657a2164599bbd2f852bf1527f4d10ef7",
     "tools/scripts/source_build.py": "9e62de2961c3746a09505f3188204fcab29a818b1e1e645ae1bc44f858aeb625",
-    "tools/scripts/verify.py": "d6d91117bb3a3e4a163c153c797b5ba89d37308fc866228de9394e3c5d0a1f90"
-  }
+    "tools/scripts/verify.py": "d6d91117bb3a3e4a163c153c797b5ba89d37308fc866228de9394e3c5d0a1f90",
+    "decomp/matching-notes/pilot-t06/physical-storage-init-trial/independent-publication-review.json": "fa7857d942a01667e33f479adcc6f8f5b7d30852d58ef06aa8eaa817f1f53d4d"
+  },
+  "independent_publication_review": "decomp/matching-notes/pilot-t06/physical-storage-init-trial/independent-publication-review.json"
 }
