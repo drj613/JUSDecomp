@@ -34,7 +34,7 @@
     "decomp/matching-notes/baseline-t01/executable-regions.json": "6d4d7f88e5edd14c07c449331f6c96dd2597b4d98f8377f253945585f9823610",
     "decomp/matching-notes/other-cpus/arm7-arena-rom-proof/checkout-eol.json": "0bbbc6b52c63eeb16d08e08725d31c72c2cd9922514a0ae1d74d05a3c96a8cb7",
     "decomp/matching-notes/other-cpus/arm7-arena-rom-proof/dependency-catalog.json": "3678ea59396a1ab6b932461750c7ec9afb334ecd19a8ab94a8b3a107a1334781",
-    "decomp/matching-notes/pilot-t06/constructor-storage-contract/README.md": "0735705e22ab3d1890605b152f4ca2cc2c98dfde683817b37a38bcad92edaa89",
+    "decomp/matching-notes/pilot-t06/constructor-storage-contract/README.md": "37d88408218f44fe6e919eea0734a4b44758a4eac168246dc99a26234ca655f2",
     "decomp/matching-notes/pilot-t06/constructor-storage-contract/check_original.py": "6ea86d2a643a60ee615a93e1807b06a38f1454eb59843fab9396fa79ca641b1d",
     "decomp/matching-notes/pilot-t06/constructor-storage-contract/contract.json": "a1398492742c6ceb365169ace4c6da688cf2dcd294dfe67c679018c05d908994",
     "decomp/matching-notes/pilot-t06/constructor-storage-contract/independent-executed-closure.json": "ad476ad90d3c15f414e180c0f3f42fac259d559ee724981f519464d5fc5df89b",
@@ -50,6 +50,8 @@
     "decomp/matching-notes/verify-evidence-pins.py": "086c1c4b783c3a2dd7b749df30536f4276160600307116d8d29c9cba0c974a07",
     "decomp/toolchain.lock.json": "9d713539bd7ad25c4d870ec691cd39418173400fb98461b68ac17067c2cdbe94",
     "tools/scripts/native_link.py": "93698934ce644a0fee6b4ac12e80e68c5adf5199bf69c0954bbd108ed02ebfb3",
-    "tools/scripts/verify.py": "d6d91117bb3a3e4a163c153c797b5ba89d37308fc866228de9394e3c5d0a1f90"
-  }
+    "tools/scripts/verify.py": "d6d91117bb3a3e4a163c153c797b5ba89d37308fc866228de9394e3c5d0a1f90",
+    "decomp/matching-notes/pilot-t06/constructor-storage-contract/independent-publication-review.json": "4b4c12629bab9e4d57a03e075b01c8afb8bbe5306cdef49e56f2650df9034eb1"
+  },
+  "independent_publication_review": "decomp/matching-notes/pilot-t06/constructor-storage-contract/independent-publication-review.json"
 }

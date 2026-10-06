@@ -74,7 +74,7 @@ This contract supports preallocated storage and a key plus optional label at the
 
 ## Acceptance evidence
 
-Fresh root and independent replays passed. Root raw ELF and ROM readers and the independent execution trace are retained beside the contract. The accepted package has 26 strict published artifact pins. All 56 runtime repository pins also match the existing 119-input catalog. Nine have identical Git and working bytes; 47 are the existing LF blobs consumed as CRLF under unchanged attributes. The earlier owned conversion record remains unchanged and is pinned by this acceptance.
+Fresh root and independent replays passed. Root raw ELF and ROM readers and the independent execution trace are retained beside the contract. The accepted package has 27 strict published artifact pins. All 56 runtime repository pins also match the existing 119-input catalog. Nine have identical Git and working bytes; 47 are the existing LF blobs consumed as CRLF under unchanged attributes. The earlier owned conversion record remains unchanged and is pinned by this acceptance.
 
 After committing, verify published pins and the existing checkout-byte relation:
 
