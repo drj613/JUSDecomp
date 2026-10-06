@@ -65,6 +65,9 @@
     ".gitattributes": "93b8e1ad54f01413492d35ccc8295ccda5fa131a8eab9ba4124f69df2f047745",
     "decomp/matching-notes/verify-evidence-pins.py": "086c1c4b783c3a2dd7b749df30536f4276160600307116d8d29c9cba0c974a07",
     "decomp/matching-notes/other-cpus/arm7-arena-rom-proof/checkout-eol.json": "0bbbc6b52c63eeb16d08e08725d31c72c2cd9922514a0ae1d74d05a3c96a8cb7",
-    "decomp/matching-notes/other-cpus/arm7-arena-rom-proof/dependency-catalog.json": "3678ea59396a1ab6b932461750c7ec9afb334ecd19a8ab94a8b3a107a1334781"
-  }
+    "decomp/matching-notes/other-cpus/arm7-arena-rom-proof/dependency-catalog.json": "3678ea59396a1ab6b932461750c7ec9afb334ecd19a8ab94a8b3a107a1334781",
+    "decomp/matching-notes/pilot-t06/signed-byte-fold-contract/evidence/independent-publication-review.json": "88fa5dec62f5b30469d61fba53c4d8c96981eee6342574397da8c4facbde8ca7"
+  },
+  "independent_publication_review": "decomp/matching-notes/pilot-t06/signed-byte-fold-contract/evidence/independent-publication-review.json",
+  "publication_review_bounds": "Exact source1ebd198 and trackerc878122e; later audit copy and39 excluded"
 }
