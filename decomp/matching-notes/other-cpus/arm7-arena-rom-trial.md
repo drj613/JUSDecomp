@@ -27,3 +27,11 @@ ROM_TRIAL_TEST_ROOT=/private/tmp/UNUSED_CHECKOUT_READBACK PYTHONDONTWRITEBYTECOD
 ```
 
 Actual controls cover changed or missing source/object/command/map/ELF/receipt inputs, a privately consumed tool copy, stale/symlink/escaped outputs, wrong ELF flags and original mappings, duplicate or out-of-program writes, a non-target ROM change, missing trial authority and late mutations. A reproduced final-publication bug allowed the ROM, checkpoint or receipt to change at receipt close. The fixed replay exclusively publishes the receipt, then rechecks the complete captured output map, ROM and exact receipt bytes before returning. Optimized Python is rejected before the inherited assertion-based readers run. Test-first logs and the compact measured worker result are in the proof package.
+
+Root and independent fresh checkouts reproduced the original whole ROM. The independent suite passed all twelve tests in 173.405 seconds. `root-review.json`, `root-readback.json` and `independent-review.json` record the measured checks; the root reader accepts a fresh output directory; the independent script preserves its actual review paths. Root also ran the real final-receipt ROM mutation against the fixed replay and confirmed rejection. The historical successful mutated-ROM receipt is retained separately as the pre-fix refutation. The trail review used a manually selected bounded excerpt, rather than the complete transcript.
+
+Run the root byte reader on a successful fresh replay:
+
+```sh
+python3 decomp/matching-notes/other-cpus/arm7-arena-rom-proof/root-readback.py /private/tmp/NEW_REPLAY_DIRECTORY /private/tmp/NEW_READBACK.json decomp/matching-notes/other-cpus/arm7-checked-layouts.json
+```
