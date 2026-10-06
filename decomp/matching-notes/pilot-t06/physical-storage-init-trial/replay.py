@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import time
@@ -23,6 +24,10 @@ def digest(path):
 def check_snapshot(snapshot):
     for name, expected in snapshot.items():
         path = Path(name)
+        if path.is_symlink():
+            aliases = json.loads((CAPSULE / 'pins.json').read_text())['external_resolved_targets']
+            if aliases.get(name) != str(path.resolve()):
+                raise ValueError('symlinked pinned input/artifact: ' + name)
         if not path.is_file() or digest(path) != expected:
             raise ValueError('changed or missing pinned input/artifact: ' + name)
 
@@ -36,19 +41,28 @@ def fresh_output(path):
 def publish_receipt(path, payload, snapshot):
     with path.open('xb') as stream:
         stream.write(payload)
-    try:
-        if path.read_bytes() != payload:
-            raise ValueError('published receipt bytes changed')
-        check_snapshot(snapshot)
-        expected_files = {Path(name) for name in snapshot if Path(name).is_relative_to(path.parent)}
-        actual_files = {p for p in path.parent.rglob('*') if p.is_file() and '.git' not in p.relative_to(path.parent).parts and p != path}
-        if actual_files != expected_files:
-            raise ValueError('post-publication artifact inventory changed')
-        if path.read_bytes() != payload:
-            raise ValueError('receipt changed during post-publication freshness')
-    except BaseException:
-        path.unlink()
-        raise
+        stream.flush()
+        original = os.fstat(stream.fileno())
+        def require_owned_receipt():
+            current = path.lstat()
+            if not stat.S_ISREG(current.st_mode) or (current.st_dev, current.st_ino) != (original.st_dev, original.st_ino):
+                raise ValueError('published receipt path is no longer the exclusively created regular file')
+            if path.read_bytes() != payload:
+                raise ValueError('published receipt bytes changed')
+        try:
+            require_owned_receipt()
+            check_snapshot(snapshot)
+            expected_files = {Path(name) for name in snapshot if Path(name).is_relative_to(path.parent)}
+            produced = [p for p in path.parent.rglob('*') if '.git' not in p.relative_to(path.parent).parts and p != path]
+            if any(p.is_symlink() for p in produced):
+                raise ValueError('post-publication artifact is symlinked')
+            actual_files = {p for p in produced if p.is_file()}
+            if actual_files != expected_files:
+                raise ValueError('post-publication artifact inventory changed')
+            require_owned_receipt()
+        except BaseException:
+            path.unlink(missing_ok=True)
+            raise
 
 
 def input_snapshot():

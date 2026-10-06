@@ -55,4 +55,33 @@ class BoundaryTests(unittest.TestCase):
             with patch.object(r,'check_snapshot',mutate_after_write):
                 with self.assertRaises(ValueError): r.publish_receipt(receipt,b'new',{})
             self.assertFalse(receipt.exists())
+    def test_late_same_byte_receipt_symlink_rejects(self):
+        with tempfile.TemporaryDirectory() as d:
+            output=Path(d)/'output'; output.mkdir()
+            external=Path(d)/'external'; external.write_bytes(b'new')
+            receipt=output/'receipt.json'
+            def substitute_after_write(snapshot):
+                self.assertEqual(receipt.read_bytes(),b'new')
+                receipt.unlink(); receipt.symlink_to(external)
+                self.assertEqual(receipt.read_bytes(),b'new')
+            with patch.object(r,'check_snapshot',substitute_after_write):
+                with self.assertRaises(ValueError): r.publish_receipt(receipt,b'new',{})
+            self.assertFalse(receipt.exists()); self.assertFalse(receipt.is_symlink())
+            self.assertEqual(external.read_bytes(),b'new')
+    def test_late_same_byte_artifact_symlink_rejects(self):
+        with tempfile.TemporaryDirectory() as d:
+            output=Path(d)/'output'; output.mkdir()
+            external=Path(d)/'external.o'; external.write_bytes(b'compiled')
+            artifact=output/'compiled.o'; artifact.write_bytes(b'compiled')
+            receipt=output/'receipt.json'; snapshot={str(artifact):r.digest(artifact)}
+            real_check=r.check_snapshot
+            def substitute_after_write(values):
+                self.assertEqual(receipt.read_bytes(),b'new')
+                artifact.unlink(); artifact.symlink_to(external)
+                self.assertEqual(artifact.read_bytes(),b'compiled')
+                real_check(values)
+            with patch.object(r,'check_snapshot',substitute_after_write):
+                with self.assertRaises(ValueError): r.publish_receipt(receipt,b'new',snapshot)
+            self.assertFalse(receipt.exists()); self.assertFalse(receipt.is_symlink())
+            self.assertEqual(external.read_bytes(),b'compiled')
 if __name__=='__main__': unittest.main()
